@@ -1,0 +1,292 @@
+﻿﻿
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Management</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-image: url("https://img.freepik.com/premium-photo/smart-warehouse-inventory-management-system-concept-manager-using-digital-tablet-showing-warehouse-software-management-dashboard-blurred-warehouse-as-background_114016-20887.jpg");
+            background-repeat: no-repeat;
+            background-size: cover;
+        }
+
+        h1, h2 {
+            text-align: center;
+            color: antiquewhite;
+        }
+
+        #OrderForm {
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+            margin: 20px auto;
+        }
+
+        .form-group {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+            .form-group label {
+                flex: 0 0 30%;
+                font-weight: bold;
+                color: #2c3e50;
+            }
+
+            .form-group input,
+            .form-group select {
+                flex: 1;
+                padding: 8px;
+                border-radius: 4px;
+                border: 1px solid #ccc;
+            }
+
+        button {
+            padding: 10px;
+            width: 100%;
+            background-color: #3498db;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 10px;
+            border-radius: 4px;
+        }
+
+            button:hover {
+                background-color: #2980b9;
+            }
+
+        #responseMessage {
+            margin-top: 20px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        #OrdersList {
+            margin-top: 30px;
+        }
+
+        table {
+            background-color: white; /* Set background color to white */
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #2980b9;
+            color: white;
+            font-weight: bold;
+        }
+
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Order Management</h1>
+
+    <div id="OrderForm">
+
+        <div class="form-group">
+            <label for="productId">Product ID:</label>
+            <select id="productId" name="productId" required>
+                <!-- Product options will be populated here -->
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="quantity">Quantity:</label>
+            <input type="number" id="quantity" name="quantity" required>
+        </div>
+
+        <div class="form-group">
+            <label for="orderDate">Order Date:</label>
+            <input type="date" id="orderDate" name="orderDate" required>
+        </div>
+
+        <div class="form-group">
+            <label for="status">Status:</label>
+            <select id="status" name="status" required>
+                <option value="completed">Completed</option>
+                <option value="pending">Pending</option>
+                <option value="return">Return</option>
+            </select>
+        </div>
+
+
+        <button type="button" onclick="submitOrder()">Submit</button>
+    </div>
+
+    <label id="responseMessage"></label>
+
+    <h2>View All Orders</h2>
+    <button type="button" onclick="fetchAllOrders()">Get All Orders</button>
+
+    <div id="OrdersList"></div>
+
+    <script>
+        const apiUrl = 'https://localhost:7175/api/Orders'; // Adjust API URL accordingly
+        const productApiUrl = 'https://localhost:7175/api/Products'; // Adjust API URL for products
+        let currentOrderId = null; // To track if an order is being edited
+
+        function displayMessage(message, isError = false) {
+            const responseLabel = document.getElementById("responseMessage");
+            responseLabel.style.color = isError ? "red" : "green";
+            responseLabel.textContent = message;
+        }
+
+        function submitOrder() {
+            const orderData = {
+                productId: parseInt(document.getElementById("productId").value),
+                quantity: parseInt(document.getElementById("quantity").value),
+                orderDate: new Date(document.getElementById("orderDate").value).toISOString(),
+                status: document.getElementById("status").value
+            };
+
+            if (currentOrderId) {
+                // If currentOrderId is set, call PUT (update)
+                fetch(`${apiUrl}/${currentOrderId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(orderData)
+                })
+                    .then(response => {
+                        if (response.ok) {
+                            displayMessage('Order updated successfully.');
+                            fetchAllOrders(); // Refresh order list
+                            resetForm();
+                        } else {
+                            throw new Error('Failed to update order.');
+                        }
+                    })
+                    .catch(error => displayMessage(error.message, true));
+            } else {
+                // If currentOrderId is not set, call POST (add new order)
+                fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(orderData)
+                })
+                    .then(response => {
+                        if (response.ok) {
+                            displayMessage('Order added successfully.');
+                            fetchAllOrders(); // Refresh order list
+                            resetForm();
+                        } else {
+                            throw new Error('Failed to add order.');
+                        }
+                    })
+                    .catch(error => displayMessage(error.message, true));
+            }
+        }
+
+        function resetForm() {
+            document.getElementById("productId").value = '';
+            document.getElementById("quantity").value = '';
+            document.getElementById("orderDate").value = '';
+            document.getElementById("status").value = '';
+            currentOrderId = null; // Reset the order ID for adding new orders
+        }
+
+        function fetchAllOrders() {
+            fetch(apiUrl)
+                .then(response => response.json())
+                .then(data => displayOrders(data))
+                .catch(error => displayMessage('There is an error fetching orders.', true));
+        }
+
+        function displayOrders(orders) {
+            const ordersList = document.getElementById("OrdersList");
+            ordersList.innerHTML = `<h3>Order List:</h3><table>
+                                            <tr><th>Order ID</th><th>Product ID</th><th>Quantity</th><th>Order Date</th><th>Status</th><th>Action</th><th>Edit</th></tr>
+                                            ${orders.map(order => `
+                                                <tr>
+                                                    <td>${order.orderId}</td>
+                                                    <td>${order.productId}</td>
+                                                    <td>${order.quantity}</td>
+                                                    <td>${order.orderDate}</td>
+                                                    <td>${order.status}</td>
+                                                    <td><button type="button" onclick="deleteOrder(${order.orderId})">DELETE</button></td>
+                                                    <td><button type="button" onclick="editOrder(${order.orderId})">EDIT</button></td>
+                                                </tr>`).join('')}`
+                ;
+        }
+
+        function editOrder(orderId) {
+            fetch(`${apiUrl}/${orderId}`)
+                .then(response => response.json())
+                .then(order => {
+                    document.getElementById("productId").value = order.productId;
+                    document.getElementById("quantity").value = order.quantity;
+                    document.getElementById("orderDate").value = new Date(order.orderDate).toISOString().split('T')[0];
+                    document.getElementById("status").value = order.status;
+                    currentOrderId = orderId; // Set the currentOrderId to indicate we're editing
+                    window.scrollTo(0, 0);
+                })
+                .catch(error => displayMessage('Error fetching order for edit.', true));
+        }
+
+        function deleteOrder(orderId) {
+            if (!confirm(`Are you sure you want to delete order ID: ${orderId}?`)) {
+                return;
+            }
+
+            fetch(`${apiUrl}/${orderId}`, {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' }
+            })
+                .then(response => {
+                    if (response.ok) {
+                        displayMessage('Order deleted successfully.');
+                        fetchAllOrders(); // Refresh order list after deletion
+                    } else {
+                        displayMessage('Failed to delete order.', true);
+                    }
+                })
+                .catch(error => {
+                    displayMessage('There was an error connecting to the server: ' + error, true);
+                });
+        }
+
+        // Fetch products and populate the productId dropdown
+        function fetchProducts() {
+            fetch(productApiUrl)
+                .then(response => response.json())
+                .then(products => {
+                    const productSelect = document.getElementById("productId");
+                    products.forEach(product => {
+                        const option = document.createElement("option");
+                        option.value = product.productId;  // assuming the product has a 'productId' field
+                        option.text = product.productId; // assuming the product has a 'productName' field
+                        productSelect.appendChild(option);
+                    });
+                })
+                .catch(error => displayMessage('Failed to load products.', true));
+        }
+
+        // Load the products on page load
+        window.onload = function () {
+            fetchProducts();
+        };
+    </script>
+</body>
+</html>

@@ -1,0 +1,198 @@
+﻿﻿
+@{
+    ViewBag.Title = "ReturnTrack";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Management</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-image: url("https://img.freepik.com/premium-photo/smart-warehouse-inventory-management-system-concept-manager-using-digital-tablet-showing-warehouse-software-management-dashboard-blurred-warehouse-as-background_114016-20887.jpg");
+            background-repeat: no-repeat;
+            background-size: cover;
+        }
+
+        h1, h2 {
+            text-align: center;
+            color: antiquewhite;
+        }
+
+        #OrderForm {
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+            margin: 20px auto;
+        }
+
+        .form-group {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+            .form-group label {
+                flex: 0 0 30%;
+                font-weight: bold;
+                color: #2c3e50;
+            }
+
+            .form-group input,
+            .form-group select {
+                flex: 1;
+                padding: 8px;
+                border-radius: 4px;
+                border: 1px solid #ccc;
+            }
+
+        button {
+            padding: 10px;
+            width: 100%;
+            background-color: #3498db;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 10px;
+            border-radius: 4px;
+        }
+
+            button:hover {
+                background-color: #2980b9;
+            }
+
+        #responseMessage {
+            margin-top: 20px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        #OrdersList {
+            margin-top: 30px;
+        }
+
+        table {
+            background-color: white; /* Set background color to white */
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #2980b9;
+            color: white;
+            font-weight: bold;
+        }
+
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Order Management</h1>
+
+    <h2>View All Orders</h2>
+    <button type="button" onclick="fetchAllOrders()">Get All Orders</button>
+
+    <div id="OrdersList"></div>
+
+
+    <script>
+        const apiUrl = 'https://localhost:7175/api/Orders'; // Adjust API URL accordingly
+        const productApiUrl = 'https://localhost:7175/api/Products'; // Adjust API URL for products
+
+        function displayMessage(message, isError = false) {
+            const responseLabel = document.getElementById("responseMessage");
+            responseLabel.style.color = isError ? "red" : "green";
+            responseLabel.textContent = message;
+        }
+
+        function fetchAllOrders() {
+            fetch(apiUrl)
+                .then(response => response.json())
+                .then(data => displayOrders(data))
+                .catch(error => displayMessage('There is an error fetching orders.', true));
+        }
+
+        function displayOrders(orders) {
+            const ordersList = document.getElementById("OrdersList");
+            let ordersTable = `<h3>Order List:</h3><table>
+                                <tr><th>Order ID</th><th>Product ID</th><th>Quantity</th><th>Order Date</th><th>Status</th><th>Product Details</th></tr>`;
+
+            orders.forEach(order => {
+                ordersTable += `
+                    <tr id="order-${order.orderId}">
+                        <td>${order.orderId}</td>
+                        <td>${order.productId}</td>
+                        <td>${order.quantity}</td>
+                        <td>${order.orderDate}</td>
+                        <td>${order.status}</td>
+                        <td id="productDetails-${order.orderId}">
+                            ${order.status === 'return' ? '<button onclick="getProductDetails(' + order.productId + ', ' + order.orderId + ')">Get Product Details</button>' : 'N/A'}
+                        </td>
+                    </tr>`;
+            });
+
+            ordersTable += `</table>`;
+            ordersList.innerHTML = ordersTable;
+        }
+
+        function getProductDetails(productId, orderId) {
+            // Fetch product details based on the productId
+            fetch(`${productApiUrl}/${productId}`)
+                .then(response => response.json())
+                .then(product => {
+                    // Create the product details table dynamically
+                    const productDetailsTable = `
+                        <tr>
+                            <td colspan="6">
+                                <h3>Product Details:</h3>
+                                <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+                                    <tr><th>Product ID</th><th>Name</th><th>Description</th><th>Price</th><th>Category ID</th><th>Stock Level</th></tr>
+                                    <tr>
+                                        <td>${product.productId}</td>
+                                        <td>${product.name}</td>
+                                        <td>${product.description}</td>
+                                        <td>$${product.price}</td>
+                                        <td>${product.categoryId}</td>
+                                        <td>${product.stockLevel}</td>
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>`;
+
+                    // Find the order row and append the product details table below it
+                    const orderRow = document.getElementById(`order-${orderId}`);
+                    const productDetailsRow = document.createElement('tr');
+                    productDetailsRow.innerHTML = productDetailsTable;
+
+                    // Insert the new row after the order row
+                    orderRow.insertAdjacentElement('afterend', productDetailsRow);
+                })
+                .catch(error => {
+                    displayMessage('Error fetching product details.', true);
+                    document.getElementById(`productDetails-${orderId}`).innerHTML = 'Error fetching product details.';
+                });
+        }
+    </script>
+
+
+</body>
+</html>

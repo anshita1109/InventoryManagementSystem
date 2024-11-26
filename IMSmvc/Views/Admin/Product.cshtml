@@ -1,0 +1,219 @@
+﻿﻿
+@{
+    ViewBag.Title = "Product";
+}
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Management</title>
+    <style>
+        /* Basic styling */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+            background-image: url("https://img.freepik.com/premium-photo/smart-warehouse-inventory-management-system-concept-manager-using-digital-tablet-showing-warehouse-software-management-dashboard-blurred-warehouse-as-background_114016-20887.jpg");
+            background-repeat: no-repeat;
+            background-size: cover;
+        }
+
+        h1, h2 {
+            text-align: center;
+            color: antiquewhite;
+        }
+
+        #ProductForm {
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            margin: 20px auto;
+        }
+
+        .form-group {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+            .form-group label {
+                width: 150px; /* Fixed width for labels */
+                font-weight: bold;
+                text-align: left;
+                margin-right: 10px;
+            }
+
+            .form-group input {
+                flex: 1;
+                padding: 8px;
+                border-radius: 4px;
+                border: 1px solid #ccc;
+            }
+
+        button {
+            padding: 10px;
+            width: 100%;
+            background-color: #3498db;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+
+            button:hover {
+                background-color: #2980b9;
+            }
+
+        table {
+            background-color: white; /* Set background color to white */
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+            color: black;
+        }
+
+        th {
+            background-color: #2980b9;
+            color: white;
+            font-weight: bold;
+        }
+
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        #responseMessage {
+            margin-top: 20px;
+            text-align: center;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>Product Management</h1>
+
+
+    <label id="responseMessage"></label>
+
+    <h2 style="color:white">View All Products</h2>
+    <button type="button" onclick="fetchAllProducts()">Get All Products</button>
+
+    <div id="ProductsList" style="color:wheat"></div>
+
+    <!-- JavaScript for handling product actions goes here -->
+    <script>
+        const apiUrl = 'https://localhost:7175/api/Products'; // Adjust API URL accordingly
+
+        function displayMessage(message, isError = false) {
+            const responseLabel = document.getElementById("responseMessage");
+            responseLabel.style.color = isError ? "red" : "green";
+            responseLabel.textContent = message;
+        }
+
+        function postProduct() {
+            const productData = {
+                productId: parseInt(document.getElementById("productId").value),
+                sku: document.getElementById("sku").value,
+                name: document.getElementById("name").value,
+                description: document.getElementById("description").value,
+                price: parseFloat(document.getElementById("price").value),
+                categoryId: parseInt(document.getElementById("categoryId").value),
+                stockLevel: parseInt(document.getElementById("stockLevel").value),
+                reorderLevel: parseInt(document.getElementById("reorderLevel").value),
+                supplierId: parseInt(document.getElementById("supplierId").value)
+            };
+
+            fetch(apiUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(productData)
+            })
+                .then(response => response.ok ? response.json() : Promise.reject('Failed to POST'))
+                .then(data => displayMessage('Product added successfully.'))
+                .catch(error => displayMessage(error, true));
+        }
+
+        function putProduct() {
+            const productId = document.getElementById("productId").value;
+            const productData = {
+                productId: parseInt(productId),
+                sku: document.getElementById("sku").value,
+                name: document.getElementById("name").value,
+                description: document.getElementById("description").value,
+                price: parseFloat(document.getElementById("price").value),
+                categoryId: parseInt(document.getElementById("categoryId").value),
+                stockLevel: parseInt(document.getElementById("stockLevel").value),
+                reorderLevel: parseInt(document.getElementById("reorderLevel").value),
+                supplierId: parseInt(document.getElementById("supplierId").value)
+            };
+
+            fetch(`${apiUrl}/${productId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(productData)
+            })
+                .then(response => response.ok ? response.json() : Promise.reject('Failed to PUT'))
+                .then(data => displayMessage('Product updated successfully.'))
+                .catch(error => displayMessage(error, true));
+        }
+
+        function deleteProduct() {
+            const productId = document.getElementById("productId").value;
+
+            fetch(`${apiUrl}/${productId}`, {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' }
+            })
+                .then(response => response.ok ? displayMessage('Product deleted successfully.') : Promise.reject('Failed to DELETE'))
+                .catch(error => displayMessage(error, true));
+        }
+
+        function fetchAllProducts() {
+            fetch(apiUrl)
+                .then(response => response.json())
+                .then(data => displayProducts(data))
+                .catch(error => displayMessage('Error fetching products.', true));
+        }
+
+        function displayProducts(products) {
+            const productsList = document.getElementById("ProductsList");
+            productsList.innerHTML = `<div class="table-container">
+                        <h3>Product List:</h3>
+                        <table>
+                            <tr><th>ID</th><th>Name</th><th>SKU</th><th>Description</th><th>Price</th><th>Category ID</th><th>Stock Level</th><th>Reorder Level</th><th>Supplier Id</th></tr>
+                            ${products.map(product => `
+                                <tr>
+                                    <td>${product.productId}</td>
+                                    <td>${product.name}</td>
+                                    <td>${product.sku}</td>
+                                    <td>${product.description}</td>
+                                    <td>${product.price.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</td>
+                                    <td>${product.categoryId}</td>
+                                    <td>${product.stockLevel}</td>
+                                    <td>${product.reorderLevel}</td>
+                                    <td>${product.supplierId}</td>
+
+
+                                </tr>`).join('')}
+                        </table>
+                    </div>`;
+        }
+    </script>
+
+</body>
+</html>

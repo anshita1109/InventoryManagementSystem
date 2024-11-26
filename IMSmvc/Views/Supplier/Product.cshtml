@@ -1,0 +1,490 @@
+﻿﻿@{ ViewBag.Title = "Product"; }
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product</title>
+    <style>
+        /* Basic styling */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+            background-image: url("https://img.freepik.com/premium-photo/smart-warehouse-inventory-management-system-concept-manager-using-digital-tablet-showing-warehouse-software-management-dashboard-blurred-warehouse-as-background_114016-20887.jpg");
+            background-repeat: no-repeat;
+            background-size: cover;
+        }
+
+        h1 {
+            text-align: center;
+            color: antiquewhite;
+        }
+
+        #ProductForm {
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            margin: 20px auto;
+        }
+
+        .form-group {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+            .form-group label {
+                width: 150px; /* Fixed width for labels */
+                font-weight: bold;
+                text-align: left;
+                margin-right: 10px;
+            }
+
+            .form-group input {
+                flex: 1;
+                padding: 8px;
+                border-radius: 4px;
+                border: 1px solid #ccc;
+            }
+
+            .form-group select {
+                flex: 1;
+                padding: 8px;
+                border-radius: 4px;
+                border: 1px solid #ccc;
+            }
+
+        button {
+            padding: 10px;
+            width: 100%;
+            background-color: #3498db;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+
+            button:hover {
+                background-color: #2980b9;
+            }
+
+        table {
+            background-color: white; /* Set background color to white */
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+            color: black;
+        }
+
+        th {
+            background-color: #2980b9;
+            color: white;
+            font-weight: bold;
+        }
+
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        #responseMessage {
+            margin-top: 20px;
+            text-align: center;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>Product Management</h1>
+
+    <div id="ProductForm">
+        <div class="form-group">
+            <label for="productId">Product ID:</label>
+            <input type="number" id="productId" name="productId" required disabled>
+        </div>
+
+        <div class="form-group">
+            <label for="name">Name:</label>
+            <input type="text" id="name" name="name" required>
+        </div>
+
+        <div class="form-group">
+            <label for="sku">SKU:</label>
+            <input type="text" id="sku" name="sku" required>
+        </div>
+
+        <div class="form-group">
+            <label for="description">Description:</label>
+            <input type="text" id="description" name="description" required>
+        </div>
+
+        <div class="form-group">
+            <label for="price">Price:</label>
+            <input type="number" step="0.01" id="price" name="price" required>
+        </div>
+
+        <div class="form-group">
+            <label for="categoryId">Category ID:</label>
+            <select id="categoryId" name="categoryId" required>
+
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+            </select>
+        </div>
+
+
+        <div class="form-group">
+            <label for="stockLevel">Stock Level:</label>
+            <input type="number" id="stockLevel" name="stockLevel" required>
+        </div>
+
+        <div class="form-group">
+            <label for="reorderLevel">Reorder Level:</label>
+            <input type="number" id="reorderLevel" name="reorderLevel" required>
+        </div>
+
+        <div class="form-group">
+            <label for="supplierId">Supplier ID:</label>
+            <select id="supplierId" name="supplierId" required>
+                <option value="">Select Supplier</option>
+            </select>
+        </div>
+        <button type="button" onclick="postProduct()">Submit</button>
+        <button type="button" id="updateButton" style="display:none;" onclick="putProduct()">Update</button>
+    </div>
+
+    <label id="responseMessage"></label>
+
+    <h2 style="color:antiquewhite">View All Products</h2>
+    <button type="button" onclick="fetchAllProducts()">Get All Products</button>
+
+    <div id="ProductsList" style="color:wheat"></div>
+
+    <script>
+        const apiUrl = 'https://localhost:7175/api/Products';
+        const supplierApiUrl = 'https://localhost:7175/api/Suppliers';
+
+        // Display the supplier dropdown
+        function loadSuppliers() {
+            fetch(supplierApiUrl)
+                .then(response => response.json())
+                .then(data => {
+                    const supplierSelect = document.getElementById("supplierId");
+                    data.forEach(supplier => {
+                        const option = document.createElement("option");
+                        option.value = supplier.supplierId;
+                        option.textContent = supplier.supplierId; // assuming 'name' is a field in the Supplier object
+                        supplierSelect.appendChild(option);
+                    });
+                })
+                .catch(error => displayMessage('Error loading suppliers: ' + error, true));
+        }
+
+        // Initialize the page
+        loadSuppliers();
+
+        function displayMessage(message, isError = false) {
+            const responseLabel = document.getElementById("responseMessage");
+            responseLabel.style.color = isError ? "red" : "green";
+            responseLabel.textContent = message;
+        }
+
+        function displayMessage(message, isError = false) {
+            const responseLabel = document.getElementById("responseMessage");
+            responseLabel.style.color = isError ? "red" : "green";
+            responseLabel.textContent = message;
+        }
+
+        // POST method to add a product
+        function postProduct() {
+            const productData = {
+                productId: parseInt(document.getElementById("productId").value),
+                sku: document.getElementById("sku").value,
+                name: document.getElementById("name").value,
+                description: document.getElementById("description").value,
+                price: parseFloat(document.getElementById("price").value),
+                categoryId: parseInt(document.getElementById("categoryId").value),
+                stockLevel: parseInt(document.getElementById("stockLevel").value),
+                reorderLevel: parseInt(document.getElementById("reorderLevel").value),
+                supplierId: parseInt(document.getElementById("supplierId").value)
+            };
+
+            fetch(apiUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(productData)
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        return Promise.reject('Failed to Submit');
+                    }
+                    return response.json();
+                })
+                .then(data => displayMessage('Product added successfully.'))
+                .catch(error => displayMessage(error, true));
+        }
+
+
+
+        // Reset the form after updating
+        function resetForm() {
+            document.getElementById("productId").value = ''; // Reset productId
+            document.getElementById("sku").value = '';       // Reset SKU
+            document.getElementById("name").value = '';      // Reset Name
+            document.getElementById("description").value = ''; // Reset Description
+            document.getElementById("price").value = '';     // Reset Price
+            document.getElementById("categoryId").value = ''; // Reset CategoryId
+            document.getElementById("stockLevel").value = ''; // Reset StockLevel
+            document.getElementById("reorderLevel").value = ''; // Reset ReorderLevel
+            document.getElementById("supplierId").value = ''; // Reset SupplierId
+
+            // Show the submit button again and hide the update button
+            document.querySelector("button[type='button']").style.display = 'inline-block';
+            document.getElementById("updateButton").style.display = 'none';
+        }
+
+        // PUT method to edit a product
+        function putProduct() {
+            const productId = document.getElementById("productId").value;
+            const productData = {
+                productId: parseInt(productId),
+                sku: document.getElementById("sku").value,
+                name: document.getElementById("name").value,
+                description: document.getElementById("description").value,
+                price: parseFloat(document.getElementById("price").value),
+                categoryId: parseInt(document.getElementById("categoryId").value),
+                stockLevel: parseInt(document.getElementById("stockLevel").value),
+                reorderLevel: parseInt(document.getElementById("reorderLevel").value),
+                supplierId: parseInt(document.getElementById("supplierId").value)
+            };
+
+            fetch(`${apiUrl}/${productId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(productData)
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        return Promise.reject('Failed to update');
+                    }
+                    if (response.status === 204) {
+                        displayMessage('Product updated successfully.');
+                        fetchAllProducts(); // Refresh the list
+                        resetForm(); // Reset the form after the update
+                        return;
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data) {
+                        displayMessage('Product updated successfully.');
+                        fetchAllProducts(); // Refresh the list
+                        resetForm(); // Reset the form after the update
+                    }
+                })
+                .catch(error => {
+                    displayMessage(error, true);
+                });
+        }
+
+        // DELETE method to delete a product
+        function deleteProduct(productId) {
+            fetch(`${apiUrl}/${productId}`, {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' }
+            })
+                .then(response => {
+                    if (response.ok) {
+                        displayMessage('Product deleted successfully.');
+                        fetchAllProducts(); // Refresh the list after deletion
+                    } else {
+                        throw new Error('Failed to DELETE');
+                    }
+                })
+                .catch(error => displayMessage(error, true));
+        }
+
+        // GET method to fetch all products
+        function fetchAllProducts() {
+            fetch(apiUrl)
+                .then(response => response.json())
+                .then(data => displayProducts(data))
+                .catch(error => displayMessage('There is an error fetching products.', true));
+        }
+
+        // Display the list of products
+        function displayProducts(products) {
+            const productsListDiv = document.getElementById("ProductsList");
+            productsListDiv.innerHTML = ''; // Clear the previous list
+
+            const table = document.createElement("table");
+            const tableHeader = `<tr><th>ProductId</th><th>Name</th><th>SKU</th><th>Price</th><th>Category</th><th>Stock Level</th><th>Reorder Level</th><th>Supplier Id</th><th>Action</th></tr>`;
+            table.innerHTML = tableHeader;
+
+            products.forEach(product => {
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                                        <td>${product.productId}</td>
+                                        <td>${product.name}</td>
+                                        <td>${product.sku}</td>
+                                        <td>${product.price}</td>
+                                        <td>${product.categoryId}</td>
+                                         <td>${product.stockLevel}</td>
+                                         <td>${product.reorderLevel}</td>
+                                         <td>${product.supplierId}</td>
+                                        <td>
+                                            <button onclick="editProduct(${product.productId})">Edit</button>
+                                            <button onclick="deleteProduct(${product.productId})">Delete</button>
+                                            <button onclick="checkStock(${product.productId}, ${product.stockLevel})">Check</button> <!-- New Check button -->
+                                        </td>
+                                    `;
+                table.appendChild(row);
+            });
+
+            productsListDiv.appendChild(table);
+        }
+
+        function checkStock(productId, stockLevel) {
+            // Prompt user for how many products they want to subtract from the stock
+            const quantityToSubtract = parseInt(prompt("How many products do you want to buy?", "0"));
+
+            // Validate the input to ensure it's a valid number
+            if (isNaN(quantityToSubtract) || quantityToSubtract < 0) {
+                alert("Please enter a valid positive number.");
+                return;
+            }
+
+            // Check if the requested subtraction exceeds available stock
+            if (quantityToSubtract > stockLevel) {
+                alert("Not enough stock. You can't buy more than the available stock.");
+                return;
+            }
+
+            // Calculate the remaining stock level
+            const remainingStock = stockLevel - quantityToSubtract;
+
+            console.log('Remaining Stock after subtraction:', remainingStock); // Debugging log
+
+            // Fetch the current product details to get the full product object
+            fetch(`${apiUrl}/${productId}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to fetch product details');
+                    }
+                    return response.json();
+                })
+                .then(product => {
+                    console.log('Fetched Product:', product); // Debugging log for fetched product
+
+                    // Create a new object with the updated stock level and other product details
+                    const updatedProductData = {
+                        productId: product.productId,
+                        sku: product.sku,  // Keep the existing SKU
+                        name: product.name,  // Keep the existing Name
+                        description: product.description,  // Keep the existing Description
+                        price: product.price,  // Keep the existing Price
+                        categoryId: product.categoryId,  // Keep the existing CategoryId
+                        stockLevel: remainingStock,  // Update the stock level
+                        reorderLevel: product.reorderLevel,  // Keep the existing ReorderLevel
+                        supplierId: product.supplierId  // Keep the existing SupplierId
+                    };
+
+                    console.log('Updated Product Data:', updatedProductData); // Debugging log for updated data
+
+                    // Send the PUT request with the updated product data
+                    return fetch(`${apiUrl}/${productId}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(updatedProductData)
+                    });
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        return response.text().then(errorText => {
+                            throw new Error('Error: ' + errorText);  // Show the error message returned by the server
+                        });
+                    }
+                    // Log the response for debugging
+                    console.log('Product Updated Successfully!');
+
+                    // If the stock level is below 50, show the alert message
+                    if (remainingStock < 50) {
+                        console.log('Stock level is below 50:', remainingStock); // Debugging log for the condition
+                        alert('Warning: Stock level is below 50. Please reorder soon.');
+                    }
+
+                    // Once the stock is updated, update the product table in the UI
+                    updateProductStockInTable(productId, remainingStock);
+                })
+                .catch(error => {
+                    console.error('Error updating stock level:', error.message); // Log the error
+                    alert('Error updating stock level: ' + error.message);
+                });
+        }
+
+        function updateProductStockInTable(productId, remainingStock) {
+            // Log to confirm the table update
+            console.log('Updating product stock in the table for Product ID:', productId);
+
+            // Find the row for the product and update the stock level cell
+            const rows = document.querySelectorAll("table tr");
+            rows.forEach(row => {
+                const productIdCell = row.querySelector("td:first-child");
+                if (productIdCell && parseInt(productIdCell.textContent) === productId) {
+                    const stockLevelCell = row.querySelectorAll("td")[5]; // Assuming the stock level is in the 6th column
+                    if (stockLevelCell) {
+                        stockLevelCell.textContent = remainingStock; // Update the stock level in the table
+                        console.log('Stock level updated in table:', remainingStock); // Log for debugging
+                    }
+                }
+            });
+        }
+
+
+        // GET method to fetch a single product for editing
+        function editProduct(productId) {
+            fetch(`${apiUrl}/${productId}`)
+                .then(response => {
+                    if (!response.ok) {
+                        return Promise.reject('Failed to fetch product details');
+                    }
+                    return response.json();
+                })
+                .then(product => {
+                    document.getElementById("productId").value = product.productId;
+                    document.getElementById("name").value = product.name;
+                    document.getElementById("sku").value = product.sku;
+                    document.getElementById("description").value = product.description;
+                    document.getElementById("price").value = product.price;
+                    document.getElementById("categoryId").value = product.categoryId;
+                    document.getElementById("stockLevel").value = product.stockLevel;
+                    document.getElementById("reorderLevel").value = product.reorderLevel;
+                    document.getElementById("supplierId").value = product.supplierId;
+                    document.getElementById("productId").disabled = true;
+
+                    document.querySelector("button[type='button']").style.display = 'none';
+                    document.getElementById("updateButton").style.display = 'inline-block';
+                    window.scrollTo(0, 0);
+                })
+                .catch(error => {
+                    displayMessage('Error fetching product details: ' + error, true);
+                });
+        }
+    </script>
+</body>
+</html>

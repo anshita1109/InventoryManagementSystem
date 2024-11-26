@@ -1,0 +1,207 @@
+﻿﻿
+@{
+    ViewBag.Title = "Supplier";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supplier</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+            background-image: url("https://img.freepik.com/premium-photo/smart-warehouse-inventory-management-system-concept-manager-using-digital-tablet-showing-warehouse-software-management-dashboard-blurred-warehouse-as-background_114016-20887.jpg");
+            background-repeat: no-repeat;
+            background-size: cover;
+        }
+
+        h1, h2 {
+            text-align: center;
+            color: white;
+        }
+
+        #ProductForm {
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+            margin: 20px auto;
+        }
+
+        .form-group {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+            .form-group label {
+                flex: 0 0 30%;
+                font-weight: bold;
+                color: #2c3e50;
+            }
+
+            .form-group input {
+                flex: 1;
+                padding: 8px;
+                border-radius: 4px;
+                border: 1px solid #ccc;
+            }
+
+        button {
+            padding: 10px;
+            width: 100%;
+            background-color: #3498db;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 10px;
+            border-radius: 4px;
+        }
+
+            button:hover {
+                background-color: #2980b9;
+            }
+
+        #responseMessage {
+            margin-top: 20px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        #SuppliersList {
+            margin-top: 30px;
+        }
+
+        table {
+            background-color: white;
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+            background-color: #f1f1f1;
+        }
+
+        th {
+            background-color: #2980b9;
+            color: white;
+            font-weight: bold;
+        }
+
+        tr {
+            background-color: #f1f1f1;
+        }
+
+            tr:hover {
+                background-color: #f1f1f1;
+            }
+    </style>
+</head>
+<body>
+
+    <h1>Supplier Management</h1>
+
+    <div id="ProductForm">
+
+        <div class="form-group">
+            <label for="supplierId">Supplier ID:</label>
+            <input type="number" id="supplierId" name="supplierId" required disabled>
+        </div>
+
+        <div class="form-group">
+            <label for="name">Name:</label>
+            <input type="text" id="name" name="name" required>
+        </div>
+
+        <div class="form-group">
+            <label for="contactInfo">Contact no:</label>
+            <input type="text" id="contactInfo" name="contactInfo" required>
+        </div>
+
+        <div class="form-group">
+            <label for="address">Address:</label>
+            <input type="text" id="address" name="address" required>
+        </div>
+
+        <button type="button" onclick="postSupplier()">Submit</button>
+
+    </div>
+
+    <label id="responseMessage"></label>
+
+    <div id="SuppliersList"></div>
+
+    <script>
+        const apiUrl = 'https://localhost:7175/api/Suppliers'; // Adjust API URL accordingly
+
+        function displayMessage(message, isError = false) {
+            const responseLabel = document.getElementById("responseMessage");
+            responseLabel.style.color = isError ? "red" : "green";
+            responseLabel.textContent = message;
+        }
+
+        // POST method to create a new supplier
+        function postSupplier() {
+            const supplierData = {
+                supplierId: parseInt(document.getElementById("supplierId").value),
+                contactInfo: document.getElementById("contactInfo").value,
+                name: document.getElementById("name").value,
+                address: document.getElementById("address").value
+            };
+
+            fetch(apiUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(supplierData)
+            })
+                .then(response => response.ok ? response.json() : Promise.reject('Failed to POST'))
+                .then(data => {
+                    displayMessage('Supplier added successfully.');
+                    fetchAllSuppliers();  // Refresh the supplier list after adding
+                })
+                .catch(error => displayMessage(error, true));
+        }
+
+        // GET method to fetch all suppliers and display them
+        function fetchAllSuppliers() {
+            fetch(apiUrl)
+                .then(response => response.json())
+                .then(data => displaySuppliers(data))
+                .catch(error => displayMessage('There was an error fetching suppliers.', true));
+        }
+
+        // Function to display the list of suppliers in a table
+        function displaySuppliers(suppliers) {
+            const suppliersList = document.getElementById("SuppliersList");
+            suppliersList.innerHTML = `
+                        <h3>Supplier List:</h3>
+                        <table>
+                            <tr><th>ID</th><th>Name</th><th>Contact no</th><th>Address</th></tr>
+                            ${suppliers.map(supplier => `
+                                <tr>
+                                    <td>${supplier.supplierId}</td>
+                                    <td>${supplier.name}</td>
+                                    <td>${supplier.contactInfo}</td>
+                                    <td>${supplier.address}</td>
+                                </tr>`).join('')}
+                        </table>
+                    `;
+        }
+
+        // Fetch suppliers when the page loads
+        window.onload = fetchAllSuppliers;
+    </script>
+</body>
+</html>

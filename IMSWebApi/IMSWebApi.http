@@ -1,0 +1,6 @@
+@IMSWebApi_HostAddress = http://localhost:5243
+
+GET {{IMSWebApi_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

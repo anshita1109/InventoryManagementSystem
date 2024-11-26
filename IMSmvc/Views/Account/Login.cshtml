@@ -1,0 +1,134 @@
+﻿@using IMSmvc.Models
+@model LoginViewModel
+@{
+    ViewBag.Title = "Login";
+}
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #f4f4f4;
+        background-image: url("https://img.freepik.com/free-photo/high-angle-forklift-blue-background_23-2149853122.jpg?t=st=1732540427~exp=1732544027~hmac=4e3328d577a64b50073027a467854c2db0b0c693c118cb08be583a2a41c272d6&w=740");
+        background-repeat: no-repeat;
+        background-size: cover;
+    }
+
+    .login-box {
+        background-color: #f5f5f5;
+        border: 1px solid #d3d3d3;
+        border-radius: 10px;
+        padding: 10px 20px;
+        width: 400px;
+        margin-left: 5%;
+        margin-top: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+        .login-box h2 {
+            text-align: center;
+            margin-bottom: 0;
+            color: #333;
+        }
+
+        .login-box .row {
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+        }
+
+            .login-box .row label {
+                flex: 1;
+                margin-right: 10px;
+                line-height: 34px;
+            }
+
+            .login-box .row input[type="text"],
+            .login-box .row input[type="password"] {
+                flex: 2;
+                padding: 8px;
+                font-size: 14px;
+                border-radius: 5px;
+                border: 1px solid #ccc;
+            }
+
+        .login-box .btn {
+            width: 100%;
+            background-color: black; /* Changed to black */
+            border: none;
+            color: white;
+            padding: 8px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+            .login-box .btn:hover {
+                background-color: #333; /* Darker shade of black for hover */
+            }
+
+        .login-box input[type="submit"] {
+            width: 100%;
+            padding: 8px;
+        }
+
+    .form-control {
+        width: 100%;
+        padding: 8px;
+        margin-top: 5px;
+        border-radius: 5px;
+        border: 1px solid #ccc;
+        font-family: 'Helvetica', sans-serif;
+    }
+
+        .form-control::placeholder {
+            color: #aaa;
+            font-style: italic;
+            font-family: 'Helvetica', sans-serif;
+        }
+
+    .checkbox {
+        display: flex;
+        align-items: center;
+    }
+</style>
+
+<main aria-labelledby="title" class="login-box">
+    <h2 id="title">@ViewBag.Title</h2>
+    <section id="loginForm">
+        @using (Html.BeginForm("Login", "Account", new { ReturnUrl = ViewBag.ReturnUrl }, FormMethod.Post, new { role = "form" }))
+        {
+            @Html.AntiForgeryToken()
+            <br />
+            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+            <div class="row">
+                @Html.LabelFor(m => m.Email, new { @class = "col-form-label" })
+                @Html.TextBoxFor(m => m.Email, new { @class = "form-control", placeholder = "Enter your email" })
+                @Html.ValidationMessageFor(m => m.Email, "", new { @class = "text-danger" })
+            </div>
+
+            <div class="row">
+                @Html.LabelFor(m => m.Password, new { @class = "col-form-label" })
+                @Html.PasswordFor(m => m.Password, new { @class = "form-control", placeholder = "Enter your password" })
+                @Html.ValidationMessageFor(m => m.Password, "", new { @class = "text-danger" })
+            </div>
+
+            <div class="row checkbox">
+                @Html.CheckBoxFor(m => m.RememberMe)
+                @Html.LabelFor(m => m.RememberMe)
+            </div>
+
+            <div class="row">
+                <input type="submit" value="Log in" class="btn" />
+            </div>
+            <p>
+                @Html.ActionLink("Register as a new user", "Register")
+            </p>
+        }
+    </section>
+</main>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}

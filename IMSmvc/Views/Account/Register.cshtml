@@ -1,0 +1,188 @@
+﻿@model IMSmvc.Models.RegisterViewModel
+
+@{
+    ViewBag.Title = "Register";
+}
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet" />
+
+<style>
+    /* Basic styling */
+    body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        height: 100vh;
+        padding: 10px;
+        background-color: #f4f4f4;
+        background-image: url("https://img.freepik.com/free-photo/high-angle-forklift-blue-background_23-2149853122.jpg?t=st=1732540427~exp=1732544027~hmac=4e3328d577a64b50073027a467854c2db0b0c693c118cb08be583a2a41c272d6&w=740");
+        background-repeat: no-repeat;
+        background-size: cover;
+    }
+
+    /* Form container */
+    .register-form-container {
+        background-color: #ffffff;
+        padding: 20px;
+        border-radius: 8px;
+        width: 100%;
+        max-width: 425px; /* Increased width of the box */
+        margin: 20px 0; /* Keeps the form aligned to the left */
+        box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.1);
+    }
+
+        /* Center all content inside the form */
+        .register-form-container h4,
+        .register-form-container .btn {
+            text-align: center;
+            width: 100%;
+        }
+
+        .register-form-container h4 {
+            text-decoration: underline;
+            margin-bottom: 20px;
+        }
+
+    /* Row for each form field */
+    .row {
+        margin-bottom: 12px;
+        display: flex;
+        justify-content: flex-start; /* Align fields to the left */
+        align-items: center;
+    }
+
+        /* Label styling */
+        .row label {
+            flex: 1;
+            font-size: 14px;
+            color: #333;
+            margin-right: 10px;
+            text-align: left; /* Align labels to the left */
+        }
+
+    /* Input field styling */
+    .form-control {
+        flex: 2;
+        padding: 8px;
+        font-size: 14px;
+        border-radius: 5px;
+        border: 1px solid #ccc;
+        width: 100%;
+    }
+
+    /* Adjust password and confirm password fields */
+    .password-container {
+        position: relative; /* Ensure the container is positioned relative for the absolute eye icon */
+    }
+
+    .form-control {
+        padding-right: 30px; /* Space for the eye icon on the right */
+    }
+
+    /* Eye icon styling on the right side */
+    .toggle-password {
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        cursor: pointer;
+    }
+
+    /* Submit button */
+    .btn {
+        width: 100%;
+        background-color: #333;
+        border: none;
+        color: white;
+        padding: 10px;
+        font-size: 14px;
+        border-radius: 5px;
+        cursor: pointer;
+        margin-top: 10px;
+    }
+
+        .btn:hover {
+            background-color: #555;
+        }
+
+    /* Margin for links */
+    .register-link {
+        text-align: center;
+        margin-top: 10px;
+    }
+</style>
+
+<main aria-labelledby="title" class="register-form-container">
+    <h2 id="title" style="text-align:center;">@ViewBag.Title</h2> <!-- Centered Register title -->
+
+    @using (Html.BeginForm("Register", "Account", FormMethod.Post, new { role = "form" }))
+    {
+        @Html.AntiForgeryToken()
+
+        <h4>Create a new account.</h4>
+
+        @Html.ValidationSummary("", new { @class = "text-danger" })
+
+        <!-- Email Field -->
+        <div class="row">
+            @Html.LabelFor(m => m.Email, new { @class = "col-md-2 col-form-label" })
+            <div class="col-md-10">
+                @Html.TextBoxFor(m => m.Email, new { @class = "form-control", placeholder = "Enter your email" })
+            </div>
+        </div>
+
+        <!-- Password Field with Show/Hide functionality -->
+        <div class="row">
+            @Html.LabelFor(m => m.Password, new { @class = "col-md-2 col-form-label" })
+            <div class="col-md-10 password-container">
+                @Html.PasswordFor(m => m.Password, new { @class = "form-control", id = "Password", placeholder = "Enter your password" })
+                <span toggle="#Password" class="toggle-password fa fa-eye"></span> <!-- Eye icon for password -->
+            </div>
+        </div>
+
+        <!-- Confirm Password Field with Show/Hide functionality -->
+        <div class="row">
+            @Html.LabelFor(m => m.ConfirmPassword, new { @class = "col-md-2 col-form-label" })
+            <div class="col-md-10 password-container">
+                @Html.PasswordFor(m => m.ConfirmPassword, new { @class = "form-control", id = "ConfirmPassword", placeholder = "Confirm your password" })
+                <span toggle="#ConfirmPassword" class="toggle-password fa fa-eye"></span> <!-- Eye icon for confirm password -->
+            </div>
+        </div>
+
+        <!-- Submit Button -->
+        <div class="row">
+            <div class="offset-md-2 col-md-10">
+                <input type="submit" value="Register" class="btn" />
+            </div>
+        </div>
+
+        <!-- Link to Register -->
+        <div class="register-link">
+            <p>
+                @Html.ActionLink("Already have an account? Log in", "Login")
+            </p>
+        </div>
+    }
+</main>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+
+    <script>
+        // JavaScript to toggle password visibility
+        $(document).ready(function () {
+            // When the "eye" icon is clicked
+            $(".toggle-password").click(function () {
+                var input = $($(this).attr("toggle"));
+
+                // Toggle the input type between "password" and "text"
+                if (input.attr("type") == "password") {
+                    input.attr("type", "text");  // Show password
+                    $(this).removeClass("fa-eye").addClass("fa-eye-slash");  // Change icon to "eye-slash"
+                } else {
+                    input.attr("type", "password");  // Hide password
+                    $(this).removeClass("fa-eye-slash").addClass("fa-eye");  // Change icon to "eye"
+                }
+            });
+        });
+    </script>
+}

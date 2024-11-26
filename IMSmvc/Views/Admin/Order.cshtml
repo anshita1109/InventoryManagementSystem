@@ -1,0 +1,256 @@
+﻿﻿@{
+    ViewBag.Title = "Order";
+}
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Management</title>
+    <style>
+        /* Your existing CSS styles here */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+
+        h1, h2 {
+            text-align: center;
+            color: wheat;
+        }
+
+        #OrderForm {
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+            margin: 20px auto;
+        }
+
+        .form-group {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+            .form-group label {
+                flex: 0 0 30%;
+                font-weight: bold;
+                color: #2c3e50;
+            }
+
+            .form-group input {
+                flex: 1;
+                padding: 8px;
+                border-radius: 4px;
+                border: 1px solid #ccc;
+            }
+
+        button {
+            padding: 10px;
+            width: 100%;
+            background-color: #3498db;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 10px;
+            border-radius: 4px;
+        }
+
+            button:hover {
+                background-color: #2980b9;
+            }
+
+        #responseMessage {
+            margin-top: 20px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        #OrdersList {
+            margin-top: 30px;
+        }
+
+        table {
+            background-color: white; /* Set background color to white */
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #2980b9;
+            color: white;
+            font-weight: bold;
+        }
+
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+            background-image: url("https://img.freepik.com/premium-photo/smart-warehouse-inventory-management-system-concept-manager-using-digital-tablet-showing-warehouse-software-management-dashboard-blurred-warehouse-as-background_114016-20887.jpg");
+            background-repeat: no-repeat;
+            background-size: cover;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Order Management</h1>
+
+    <label id="responseMessage"></label>
+
+
+    <h2>View Orders by Product ID</h2>
+    <div>
+        <!-- Dropdown for selecting Product ID -->
+        <select id="searchProductId" required>
+            <option value="">Select Product ID</option>
+            <!-- Dynamic options will be added here -->
+        </select>
+        <button type="button" onclick="fetchOrdersByProductId()">Search Orders by Product ID</button>
+    </div>
+
+    <h2>View All Orders</h2>
+    <button type="button" onclick="fetchAllOrders()">View All Orders</button>
+
+    <div id="OrdersList"></div>
+
+    <script>
+        // API URL (update with your actual API endpoints)
+        const productsApiUrl = 'https://localhost:7175/api/Products';  // API to fetch all products
+        const ordersApiUrl = 'https://localhost:7175/api/Orders';  // API to fetch orders
+
+        // Function to fetch products from the API
+        function fetchProducts() {
+            fetch(productsApiUrl)
+                .then(response => response.json())
+                .then(data => {
+                    populateProductDropdown(data);
+                })
+                .catch(error => {
+                    displayMessage('Error fetching product data.', true);
+                });
+        }
+
+        // Function to populate the Product ID dropdown dynamically
+        function populateProductDropdown(products) {
+            const productDropdown = document.getElementById("searchProductId");
+
+            // Clear any existing options
+            productDropdown.innerHTML = '<option value="">Select Product ID</option>';
+
+            // Add options dynamically from fetched products
+            products.forEach(product => {
+                // Ensure both productId exists before adding it to the dropdown
+                if (product.productId) {
+                    const option = document.createElement("option");
+                    option.value = product.productId; // Set the productId as the option's value
+                    option.textContent = product.productId; // Set the productId as the option's label
+                    productDropdown.appendChild(option);
+                } else {
+                    console.error('Product data missing "productId"', product);
+                }
+            });
+        }
+
+        // Function to fetch orders by Product ID
+        function fetchOrdersByProductId() {
+            const productId = document.getElementById("searchProductId").value;
+
+            if (!productId) {
+                alert('Please select a Product ID to search.');
+                return;
+            }
+
+            // Fetch orders from the API using the selected Product ID
+            fetch(`${ordersApiUrl}/GetByProductId/${productId}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to fetch orders.');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    // Display orders on the page
+                    displayOrders(data);
+                })
+                .catch(error => {
+                    // Handle error if fetching fails
+                    displayMessage('There was an error fetching orders for the selected Product ID.', true);
+                });
+        }
+
+        // Function to display the fetched orders
+        function displayOrders(orders) {
+            const ordersList = document.getElementById("OrdersList");
+
+            if (orders.length === 0) {
+                ordersList.innerHTML = '<p>No orders found for the selected Product ID.</p>';
+                return;
+            }
+
+            // Display orders in a table
+            ordersList.innerHTML = `
+                    <h3>Order List:</h3>
+                    <table>
+                        <tr><th>Order ID</th><th>Product ID</th><th>Quantity</th><th>Order Date</th><th>Status</th></tr>
+                        ${orders.map(order => `
+                            <tr>
+                                <td>${order.orderId}</td>
+                                <td>${order.productId}</td>
+                                <td>${order.quantity}</td>
+                                <td>${order.orderDate}</td>
+                                <td>${order.status}</td>
+                            </tr>
+                        `).join('')}
+                    </table>
+                `;
+        }
+
+        // Function to display a response message (error or success)
+        function displayMessage(message, isError = false) {
+            const responseLabel = document.getElementById("responseMessage");
+            responseLabel.style.color = isError ? "red" : "green";
+            responseLabel.textContent = message;
+        }
+
+        // Fetch all orders (for reference, not used in the dropdown context)
+        function fetchAllOrders() {
+            fetch(ordersApiUrl)
+                .then(response => response.json())
+                .then(data => {
+                    displayOrders(data);
+                })
+                .catch(error => {
+                    displayMessage('There was an error fetching all orders.', true);
+                });
+        }
+
+        // Call fetchProducts when the page loads to populate the dropdown
+        window.onload = function () {
+            fetchProducts();
+        };
+    </script>
+
+
+</body>
+</html>
