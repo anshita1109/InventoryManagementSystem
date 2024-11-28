@@ -1,4 +1,5 @@
-﻿using System;
+﻿
+using System;
 using System.Globalization;
 using System.Linq;
 using System.Security.Claims;
@@ -9,6 +10,10 @@ using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.Owin;
 using Microsoft.Owin.Security;
 using IMSmvc.Models;
+using System.Net.Http;
+using Newtonsoft.Json;
+//using Intuit.Ipp.Data;
+using System.Text;
 
 namespace IMSmvc.Controllers
 {
@@ -17,9 +22,11 @@ namespace IMSmvc.Controllers
     {
         private ApplicationSignInManager _signInManager;
         private ApplicationUserManager _userManager;
+        private HttpClient httpClient = new HttpClient();
 
         public AccountController()
         {
+            httpClient = new HttpClient();
         }
 
         public AccountController(ApplicationUserManager userManager, ApplicationSignInManager signInManager)
@@ -142,10 +149,12 @@ namespace IMSmvc.Controllers
             return View();
         }
 
+        //
         public ActionResult Supplier()
         {
             return View();
         }
+
         //
         // POST: /Account/Register
         [HttpPost]
@@ -167,7 +176,15 @@ namespace IMSmvc.Controllers
                     // var callbackUrl = Url.Action("ConfirmEmail", "Account", new { userId = user.Id, code = code }, protocol: Request.Url.Scheme);
                     // await UserManager.SendEmailAsync(user.Id, "Confirm your account", "Please confirm your account by clicking <a href=\"" + callbackUrl + "\">here</a>");
 
-                    return RedirectToAction("Supplier", "Account");
+                    //action name present in views/account, view name (redirected to account view) 
+                    //return RedirectToAction("Supplier", "Account");
+                    var json = JsonConvert.SerializeObject(new { name = model.Name, contactInfo = model.Email, address = model.Address });
+                    var content = new StringContent(json, Encoding.UTF8, "application/json");
+                    HttpResponseMessage httpResponseMessage = await httpClient.PostAsync("https://localhost:7125/api/Suppliers", content);
+                    if (httpResponseMessage.IsSuccessStatusCode)
+                    {
+                        return RedirectToAction("Login", "Account");
+                    }
                 }
                 AddErrors(result);
             }

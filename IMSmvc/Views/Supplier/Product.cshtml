@@ -1,4 +1,4 @@
-﻿﻿@{ ViewBag.Title = "Product"; }
+﻿﻿﻿@{ ViewBag.Title = "Product"; }
 
 <!DOCTYPE html>
 <html lang="en">
@@ -13,14 +13,14 @@
             margin: 0;
             padding: 20px;
             background-color: #f4f4f4;
-            background-image: url("https://img.freepik.com/premium-photo/smart-warehouse-inventory-management-system-concept-manager-using-digital-tablet-showing-warehouse-software-management-dashboard-blurred-warehouse-as-background_114016-20887.jpg");
+            background-image: url("https://www.fntsoftware.com/assets/images/a/Blog_Hero_Network-Inventory-Management-Solution-scaled-78307a4f.jpeg");
             background-repeat: no-repeat;
             background-size: cover;
         }
 
         h1 {
             text-align: center;
-            color: antiquewhite;
+            color: white;
         }
 
         #ProductForm {
@@ -337,20 +337,20 @@
             products.forEach(product => {
                 const row = document.createElement("tr");
                 row.innerHTML = `
-                                        <td>${product.productId}</td>
-                                        <td>${product.name}</td>
-                                        <td>${product.sku}</td>
-                                        <td>${product.price}</td>
-                                        <td>${product.categoryId}</td>
-                                         <td>${product.stockLevel}</td>
-                                         <td>${product.reorderLevel}</td>
-                                         <td>${product.supplierId}</td>
-                                        <td>
-                                            <button onclick="editProduct(${product.productId})">Edit</button>
-                                            <button onclick="deleteProduct(${product.productId})">Delete</button>
-                                            <button onclick="checkStock(${product.productId}, ${product.stockLevel})">Check</button> <!-- New Check button -->
-                                        </td>
-                                    `;
+                                            <td>${product.productId}</td>
+                                            <td>${product.name}</td>
+                                            <td>${product.sku}</td>
+                                            <td>${product.price}</td>
+                                            <td>${product.categoryId}</td>
+                                             <td>${product.stockLevel}</td>
+                                             <td>${product.reorderLevel}</td>
+                                             <td>${product.supplierId}</td>
+                                            <td>
+                                                <button onclick="editProduct(${product.productId})">Edit</button>
+                                                <button onclick="deleteProduct(${product.productId})">Delete</button>
+                                                <button onclick="checkStock(${product.productId}, ${product.stockLevel})">Check</button> <!-- New Check button -->
+                                            </td>
+                                        `;
                 table.appendChild(row);
             });
 

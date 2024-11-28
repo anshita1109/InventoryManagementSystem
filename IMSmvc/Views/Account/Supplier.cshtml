@@ -1,5 +1,4 @@
-﻿﻿
-@{
+﻿﻿@{
     ViewBag.Title = "Supplier";
 }
 
@@ -169,39 +168,41 @@
                 .then(response => response.ok ? response.json() : Promise.reject('Failed to POST'))
                 .then(data => {
                     displayMessage('Supplier added successfully.');
-                    fetchAllSuppliers();  // Refresh the supplier list after adding
+                    //fetchAllSuppliers();  // Refresh the supplier list after adding
+                    window.location.href = '@Url.Action("Login","Account")'
                 })
                 .catch(error => displayMessage(error, true));
+
         }
 
         // GET method to fetch all suppliers and display them
-        function fetchAllSuppliers() {
-            fetch(apiUrl)
-                .then(response => response.json())
-                .then(data => displaySuppliers(data))
-                .catch(error => displayMessage('There was an error fetching suppliers.', true));
-        }
+        //function fetchAllSuppliers() {
+        //    fetch(apiUrl)
+        //        .then(response => response.json())
+        //        .then(data => displaySuppliers(data))
+        //        .catch(error => displayMessage('There was an error fetching suppliers.', true));
+        //}
 
-        // Function to display the list of suppliers in a table
-        function displaySuppliers(suppliers) {
-            const suppliersList = document.getElementById("SuppliersList");
-            suppliersList.innerHTML = `
-                        <h3>Supplier List:</h3>
-                        <table>
-                            <tr><th>ID</th><th>Name</th><th>Contact no</th><th>Address</th></tr>
-                            ${suppliers.map(supplier => `
-                                <tr>
-                                    <td>${supplier.supplierId}</td>
-                                    <td>${supplier.name}</td>
-                                    <td>${supplier.contactInfo}</td>
-                                    <td>${supplier.address}</td>
-                                </tr>`).join('')}
-                        </table>
-                    `;
-        }
+        //// Function to display the list of suppliers in a table
+        //function displaySuppliers(suppliers) {
+        //    const suppliersList = document.getElementById("SuppliersList");
+        //    suppliersList.innerHTML = `
+        //                <h3>Supplier List:</h3>
+        //                <table>
+        //                    <tr><th>ID</th><th>Name</th><th>Contact no</th><th>Address</th></tr>
+        //                    ${suppliers.map(supplier => `
+        //                        <tr>
+        //                            <td>${supplier.supplierId}</td>
+        //                            <td>${supplier.name}</td>
+        //                            <td>${supplier.contactInfo}</td>
+        //                            <td>${supplier.address}</td>
+        //                        </tr>`).join('')}
+        //                </table>
+        //            `;
+        //}
 
         // Fetch suppliers when the page loads
-        window.onload = fetchAllSuppliers;
+        //window.onload = fetchAllSuppliers;
     </script>
 </body>
 </html>

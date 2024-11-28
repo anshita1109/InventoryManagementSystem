@@ -7,93 +7,227 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inventory Management System</title>
+    <title>Home - Inventory Management System</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
-        body {
-            font-family: Arial, sans-serif;
+        /* Global Reset */
+        html, body {
             margin: 0;
             padding: 0;
-            background-color: #f4f4f4;
-            background-image: url("https://img.freepik.com/premium-photo/smart-warehouse-inventory-management-system-concept-manager-using-digital-tablet-showing-warehouse-software-management-dashboard-blurred-warehouse-as-background_114016-20887.jpg");
-            background-repeat: no-repeat;
+            box-sizing: border-box;
+        }
+
+        /* Global Styles */
+        body {
             background-size: cover;
+            color: #333;
+            background-color: steelblue; /* Light Blue Background */
+            color: #333;
+            line-height: 1.6;
         }
 
+        h2, h3, p {
+            margin: 0;
+        }
+
+        a {
+            text-decoration: none;
+        }
+
+        /* Hero Section */
         .hero {
+            padding: 4rem 2rem;
+            text-align: center;
+            background: linear-gradient(135deg, #1e90ff, #87cefa);
             color: #fff;
-            padding: 6rem 0;
-            text-align: center;
-            position: relative;
-            min-height: 100vh;
+            border-bottom: 10px solid #1e90ff;
         }
 
-            .hero::before {
-                content: '';
-                position: absolute;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background: rgba(0, 0, 0, 0.4);
-            }
-
-        .hero-content {
-            position: relative;
-            z-index: 1;
-        }
-
-            .hero-content h2 {
-                font-size: 2.5rem;
-                margin-bottom: 1rem;
-            }
-
-            .hero-content p {
+            .hero p {
                 font-size: 1.2rem;
-                margin-bottom: 1.5rem;
+                margin-bottom: 2rem;
             }
 
+        .hero-btn {
+            padding: 0.8rem 2rem;
+            background-color: #fff;
+            color: #1e90ff;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 5px;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+            .hero-btn:hover {
+                transform: scale(1.1);
+                box-shadow: 0px 6px 10px rgba(0, 0, 0, 0.2);
+            }
+
+        /* Role Section */
         .role-section {
-            margin-top: 2rem;
-            padding: 1rem;
-            background-color: rgba(255, 255, 255, 0.9);
-            border-radius: 10px;
+            padding: 3rem 2rem;
             text-align: center;
+            background-color: #eaf4ff;
+            border-radius: 10px;
+            margin: 2rem auto;
+            max-width: 80%;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
         }
 
             .role-section h3 {
-                color: #333;
+                font-size: 2rem;
+                color: #1e90ff;
+                margin-bottom: 1rem;
             }
 
             .role-section p {
+                font-size: 1.1rem;
+                color: #555;
+                margin-bottom: 0.5rem;
+            }
+
+        /* Features Section */
+        .features {
+            display: flex;
+            flex-wrap: wrap;
+            padding: 3rem 2rem;
+            gap: 1.5rem;
+            justify-content: center;
+            background-color: #fff;
+        }
+
+        .feature-card {
+            flex: 1 1 calc(30% - 1rem);
+            background-color: #f7faff;
+            border-radius: 10px;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            padding: 1.5rem;
+            max-width: 300px;
+            border: 2px solid #1e90ff;
+            transition: transform 0.3s ease;
+        }
+
+            .feature-card h3 {
+                font-size: 1.5rem;
+                margin-bottom: 1rem;
+                color: #1e90ff;
+            }
+
+            .feature-card p {
+                font-size: 1rem;
                 color: #555;
             }
+
+            .feature-card:hover {
+                transform: scale(1.1);
+                transition: transform 0.3s ease;
+            }
+
+        /* Why Choose Us Section */
+        .about {
+            padding: 3rem 2rem;
+            text-align: center;
+            background-color: deepskyblue; /* Light Blue Shade */
+            color: #fff;
+        }
+
+            .about h3 {
+                font-size: 2rem;
+                margin-bottom: 1rem;
+            }
+
+            .about p {
+                font-size: 1.1rem;
+                max-width: 800px;
+                margin: 0 auto;
+            }
+
+        /* Image Section */
+        .image-section {
+            padding: 3rem 2rem;
+            text-align: center;
+            background-color: #f9fbfd;
+        }
+
+            .image-section img {
+                max-width: 65%;
+                height: auto;
+                border-radius: 10px;
+                box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+                margin-bottom: 1rem;
+            }
+
+            .image-section p {
+                font-size: 1.2rem;
+                color: #555;
+            }
+
+        /* Responsive Design */
+        media (max-width: 768px) {
+            .feature-card
+
+        {
+            flex: 1 1 calc(100% - 1rem);
+        }
+
+        .hero h2 {
+            font-size: 2.5rem;
+        }
+
+        .role-section {
+            max-width: 95%;
+        }
+        }
     </style>
 </head>
 <body>
-    <!-- Hero Section -->
-    <section id="home" class="hero">
-        <div class="hero-content">
-            <h2>Efficiently Manage Your Inventory</h2>
-            <p>Our Inventory Management System helps streamline your inventory with powerful tools for product, order, and supplier management.</p>
 
-            <!-- Role-Specific Content -->
-            @if (ViewBag.Role == "Admin")
-            {
-                <div class="role-section">
-                    <h3>Welcome, Admin!</h3>
-                    <p>"Leadership is not about being in charge. It's about taking care of those in your charge."</p>
-                    <p>"Your role is pivotal in maintaining order and driving efficiency within the system."</p>
-                </div>
-            }
-            else if (ViewBag.Role == "Supplier")
-            {
-                <div class="role-section">
-                    <h3>Welcome, Supplier!</h3>
-                    <p>"Efficiency is doing things right; effectiveness is doing the right things."</p>
-                    <p>"Your contributions help keep the supply chain seamless and customers satisfied."</p>
-                </div>
-            }
+    <!-- Role-Specific Section -->
+    <section class="role-section">
+        @if (ViewBag.Role == "Supplier")
+        {
+            <h3>Welcome, Supplier!</h3>
+            <p>"Efficiency is doing things right; effectiveness is doing the right things."</p>
+            <p>Your contributions help keep the supply chain seamless and customers satisfied.</p>
+        }
+        else if (ViewBag.Role == "Admin")
+        {
+            <h3>Welcome, Admin!</h3>
+            <p>"Leadership is not about being in charge. It's about taking care of those in your charge."</p>
+            <p>Your role is pivotal in maintaining order and driving efficiency within the system.</p>
+        }
+    </section>
+
+    <!-- Features Section -->
+    <section class="features">
+        <div class="feature-card">
+            <h3>Product Management</h3>
+            <p>Track, organize, and categorize your products effortlessly.</p>
+        </div>
+        <div class="feature-card">
+            <h3>Order Status Tracking</h3>
+            <p>Monitor and manage orders in real-time for seamless delivery.</p>
+        </div>
+        <div class="feature-card">
+            <h3>Supplier Integration</h3>
+            <p>Connect and manage supplier relationships effortlessly.</p>
         </div>
     </section>
+
+    <!-- Image Section -->
+    <section class="image-section">
+        <img src="https://thumbs.dreamstime.com/b/warehouse-automation-digital-inventory-management-modern-warehouse-shelves-stacked-boxes-image-showcases-331324844.jpg" alt="Warehouse Automation">
+        <p>Streamline your inventory processes with cutting-edge technology and automation. A modern warehouse equipped with advanced tools ensures seamless operations.</p>
+    </section>
+
+    <!-- Why Choose Us Section -->
+    <!--<section class="about">
+        <h3>Why Choose Us?</h3>
+        <p>Our system simplifies and automates inventory processes, ensuring accuracy and efficiency. From tracking stock to generating insightful reports, we provide all the tools you need for success.</p>
+    </section>-->
+
 </body>
 </html>

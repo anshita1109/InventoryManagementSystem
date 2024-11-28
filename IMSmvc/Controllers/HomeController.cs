@@ -1,26 +1,38 @@
 ﻿using IMSmvc.Models;
+//using Intuit.Ipp.Data;
+//using Intuit.Ipp.OAuth2PlatformClient;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
+using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
+
 
 namespace IMSmvc.Controllers
 {
     public class HomeController : Controller
     {
-        public ActionResult Home()
+        private readonly HttpClient _httpClient;
+        //public ActionResult Index()
+        //{
+        //    return View();
+        //}
+        public HomeController()
         {
-            return View();
+            _httpClient = new HttpClient();
         }
         [Authorize]
 
-        public ActionResult Index()
+        public async Task<ActionResult> Index()
         {
 
             SessionModel sessionModel = new SessionModel();
             Session.Add("UserName", User.Identity.Name);
 
+            SupplierDTO userResponse = null;
             if (User.Identity.Name == "admin@gmail.com")
             {
 
@@ -36,14 +48,22 @@ namespace IMSmvc.Controllers
                 // Logic for admin users
 
             }
+            //https://localhost:7254/api/Suppliers/supplierContact?contactinfo=sai%40gmail.com
             else
             {
+                HttpResponseMessage httpResponseMessage = await _httpClient.GetAsync($"https://localhost:7175/api/Suppliers/supplierContact?contactinfo=" + User.Identity.Name);
+                string responseData = await httpResponseMessage.Content.ReadAsStringAsync();
+
+                userResponse = JsonConvert.DeserializeObject<SupplierDTO>(responseData);
+
                 Session.Add("Role", "Supplier");
                 ViewBag.Role = "Supplier";
-
-
+                //return RedirectToAction("Product", "Supplier",new { id=userResponse.SupplierId});
+                ViewBag.Message = userResponse.SupplierId;
             }
+           
             return View();
         }
+
     }
 }

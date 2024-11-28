@@ -1,4 +1,4 @@
-﻿using System;
+﻿﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -9,9 +9,14 @@ namespace IMSmvc.Controllers
     public class SupplierController : Controller
     {
         // GET: Supplier
-        public ActionResult Product()
+        //public ActionResult Index()
+        //{
+        //    return View();
+        //}
+        public ActionResult Product(int id)
         {
-            return View();
+            ViewBag.Message = id;
+            return View(id);
         }
         public ActionResult Order()
         {

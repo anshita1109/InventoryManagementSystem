@@ -1,5 +1,4 @@
 ﻿﻿
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -204,22 +203,22 @@
         function displaySuppliers(suppliers) {
             const suppliersList = document.getElementById("SuppliersList");
             suppliersList.innerHTML = `
-                            <h3>Supplier List:</h3>
-                            <table>
-                                <tr><th>ID</th><th>Name</th><th>Contact no</th><th>Address</th><th>Action</th></tr>
-                                ${suppliers.map(supplier => `
-                                    <tr>
-                                        <td>${supplier.supplierId}</td>
-                                        <td>${supplier.name}</td>
-                                        <td>${supplier.contactInfo}</td>
-                                        <td>${supplier.address}</td>
-                                        <td>
-                                            <button type="button" onclick="editSupplier(${supplier.supplierId})">EDIT</button>
-                                            <button type="button" onclick="deleteSupplier(${supplier.supplierId})">DELETE</button>
-                                        </td>
-                                    </tr>`).join('')}
-                            </table>
-                        `;
+                                <h3>Supplier List:</h3>
+                                <table>
+                                    <tr><th>ID</th><th>Name</th><th>Contact no</th><th>Address</th><th>Action</th></tr>
+                                    ${suppliers.map(supplier => `
+                                        <tr>
+                                            <td>${supplier.supplierId}</td>
+                                            <td>${supplier.name}</td>
+                                            <td>${supplier.contactInfo}</td>
+                                            <td>${supplier.address}</td>
+                                            <td>
+                                                <button type="button" onclick="editSupplier(${supplier.supplierId})">EDIT</button>
+                                                <button type="button" onclick="deleteSupplier(${supplier.supplierId})">DELETE</button>
+                                            </td>
+                                        </tr>`).join('')}
+                                </table>
+                            `;
         }
 
         function editSupplier(supplierId) {

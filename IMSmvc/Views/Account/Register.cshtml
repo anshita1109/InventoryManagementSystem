@@ -25,8 +25,8 @@
         padding: 20px;
         border-radius: 8px;
         width: 100%;
-        max-width: 425px; /* Increased width of the box */
-        margin: 20px 0; /* Keeps the form aligned to the left */
+        max-width: 425px;
+        margin: 20px 0;
         box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.1);
     }
 
@@ -67,24 +67,27 @@
         border-radius: 5px;
         border: 1px solid #ccc;
         width: 100%;
+        box-sizing: border-box;
     }
 
     /* Adjust password and confirm password fields */
     .password-container {
-        position: relative; /* Ensure the container is positioned relative for the absolute eye icon */
+        position: relative;
     }
 
     .form-control {
-        padding-right: 30px; /* Space for the eye icon on the right */
+        padding-right: 35px; /* Space for the eye icon inside the field */
     }
 
-    /* Eye icon styling on the right side */
+    /* Eye icon styling inside the input box */
     .toggle-password {
         position: absolute;
         right: 10px;
         top: 50%;
         transform: translateY(-50%);
         cursor: pointer;
+        font-size: 18px;
+        color: #aaa;
     }
 
     /* Submit button */
@@ -111,14 +114,14 @@
     }
 </style>
 
-<main aria-labelledby="title" class="register-form-container">
-    <h2 id="title" style="text-align:center;">@ViewBag.Title</h2> <!-- Centered Register title -->
+<main aria-labelledby="title">
+    <h2 id="title">@ViewBag.Title</h2>
+    <br />
 
     @using (Html.BeginForm("Register", "Account", FormMethod.Post, new { role = "form" }))
     {
         @Html.AntiForgeryToken()
-
-        <h4>Create a new account.</h4>
+        <h4 style="text-decoration:underline">Create a new account.</h4>
 
         @Html.ValidationSummary("", new { @class = "text-danger" })
 
@@ -126,42 +129,56 @@
         <div class="row">
             @Html.LabelFor(m => m.Email, new { @class = "col-md-2 col-form-label" })
             <div class="col-md-10">
-                @Html.TextBoxFor(m => m.Email, new { @class = "form-control", placeholder = "Enter your email" })
+                @Html.TextBoxFor(m => m.Email, new { @class = "form-control" })
             </div>
         </div>
-
+        <br />
         <!-- Password Field with Show/Hide functionality -->
         <div class="row">
             @Html.LabelFor(m => m.Password, new { @class = "col-md-2 col-form-label" })
             <div class="col-md-10 password-container">
-                @Html.PasswordFor(m => m.Password, new { @class = "form-control", id = "Password", placeholder = "Enter your password" })
-                <span toggle="#Password" class="toggle-password fa fa-eye"></span> <!-- Eye icon for password -->
+                @Html.PasswordFor(m => m.Password, new { @class = "form-control", id = "Password" })
+                <span toggle="#Password" class="toggle-password fa fa-eye"></span>
             </div>
         </div>
-
+        <br />
         <!-- Confirm Password Field with Show/Hide functionality -->
         <div class="row">
             @Html.LabelFor(m => m.ConfirmPassword, new { @class = "col-md-2 col-form-label" })
             <div class="col-md-10 password-container">
-                @Html.PasswordFor(m => m.ConfirmPassword, new { @class = "form-control", id = "ConfirmPassword", placeholder = "Confirm your password" })
-                <span toggle="#ConfirmPassword" class="toggle-password fa fa-eye"></span> <!-- Eye icon for confirm password -->
+                @Html.PasswordFor(m => m.ConfirmPassword, new { @class = "form-control", id = "ConfirmPassword" })
+                <span toggle="#ConfirmPassword" class="toggle-password fa fa-eye"></span>
             </div>
         </div>
+        <br />
+
+        <!-- Name Field -->
+        <div class="row">
+            <label for="name" class="col-md-2 col-form-label">Name:</label>
+            <div class="col-md-10">
+                <input type="text" id="name" name="name" class="form-control" required />
+            </div>
+        </div>
+        <br />
+
+        <!-- Address Field -->
+        <div class="row">
+            <label for="address" class="col-md-2 col-form-label">Address:</label>
+            <div class="col-md-10">
+                <input type="text" id="address" name="address" class="form-control" required />
+            </div>
+        </div>
+        <br />
 
         <!-- Submit Button -->
         <div class="row">
             <div class="offset-md-2 col-md-10">
-                <input type="submit" value="Register" class="btn" />
+                <input type="submit" value="Register" class="btn btn-outline-dark" />
             </div>
         </div>
-
-        <!-- Link to Register -->
-        <div class="register-link">
-            <p>
-                @Html.ActionLink("Already have an account? Log in", "Login")
-            </p>
-        </div>
+        <br />
     }
+    <br />
 </main>
 
 @section Scripts {

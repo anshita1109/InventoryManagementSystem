@@ -1,4 +1,5 @@
-﻿using IMSWebApi.Data;
+﻿
+using IMSWebApi.Data;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -9,6 +10,9 @@ namespace IMSWebApi.Controllers
     [ApiController]
     public class ReportsController : ControllerBase
     {
+        //    private readonly InventoryDBaseContext _context;
+
+
         private readonly InventoryDBaseContext _context;
 
         // Injecting the DbContext via constructor for dependency injection
@@ -18,116 +22,95 @@ namespace IMSWebApi.Controllers
         }
 
         // GET api/reports/inventoryreport
-        [HttpGet("inventoryreport")]
-        public async Task<ActionResult> GetReport()
+        [HttpGet("stocklevelreport")]
+        public async Task<ActionResult> GetStockLevelReport()
         {
             try
             {
-                // LINQ query to get SupplierId, Supplier Name, ProductId, StockLevel, ReorderLevel, and Quantity from related tables
-                var reportData = await (from supplier in _context.Suppliers
-                                        join product in _context.Products on supplier.SupplierId equals product.SupplierId
-                                        join order in _context.Orders on product.ProductId equals order.ProductId
-                                        select new
-                                        {
-                                            supplier.SupplierId,
-                                            SupplierName = supplier.Name,
-                                            product.ProductId,
-                                            StockLevel = product.StockLevel,
-                                            ReorderLevel = product.ReorderLevel,
-                                            Quantity = order.Quantity
-                                        }).ToListAsync();
+                // Step 1: Perform a left join between Suppliers and Products
+                var supplierProducts = await (from supplier in _context.Suppliers
+                                              join product in _context.Products
+                                              on supplier.SupplierId equals product.SupplierId into supplierProductGroup
+                                              from product in supplierProductGroup.DefaultIfEmpty()
+                                              select new
+                                              {
+                                                  SupplierId = supplier.SupplierId,
+                                                  SupplierName = supplier.Name,
+                                                  ProductId = product != null ? product.ProductId : 0, // Use 0 for missing ProductId
+                                                  ProductName = product != null ? product.Name : "N/A", // Use "N/A" for missing ProductName
+                                                  StockLevel = product != null ? product.StockLevel : 0, // Use 0 for missing StockLevel
+                                                  ReorderLevel = product != null ? product.ReorderLevel : 0 // Use 0 for missing ReorderLevel
+                                              }).ToListAsync();
 
-                // If no data is returned, return a specific message
-                if (reportData == null || reportData.Count == 0)
+                // Step 2: Fetch order quantities grouped by ProductId
+                var orderQuantities = await _context.Orders
+                    .GroupBy(o => o.ProductId)
+                    .Select(g => new
+                    {
+                        ProductId = g.Key,
+                        Quantity = g.Sum(o => o.Quantity)
+                    })
+                    .ToListAsync();
+
+                // Step 3: Merge supplier-products data with order quantities
+                var stockLevelReport = supplierProducts.GroupJoin(
+                    orderQuantities,
+                    sp => sp.ProductId,
+                    oq => oq.ProductId,
+                    (sp, oqGroup) => new
+                    {
+                        sp.SupplierId,
+                        sp.SupplierName,
+                        sp.ProductId,
+                        sp.ProductName,
+                        sp.StockLevel,
+                        sp.ReorderLevel,
+                        Quantity = oqGroup.Any() ? oqGroup.Sum(oq => oq.Quantity) : 0 // Use 0 if no orders
+                    }).ToList();
+
+                // Step 4: Return the report or a "NotFound" message if empty
+                if (!stockLevelReport.Any())
                 {
-                    return NotFound("No report data available.");
+                    return NotFound("No inventory report data available.");
                 }
 
-                // Return the result as JSON
-                return Ok(reportData);
+                return Ok(stockLevelReport);
             }
             catch (Exception ex)
             {
-                // Log the exception for debugging
-                // In a production environment, you could use a logging framework like Serilog or NLog
+                // Log and return error details
                 Console.WriteLine($"Error: {ex.Message}");
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
-        //[HttpGet("supplier-performance")]
-        //public async Task<ActionResult> GetSupplierPerformanceReport()
-        //{
-        //    try
-        //    {
-        //        // LINQ query to fetch SupplierId, SupplierName, and the total number of products supplied
-        //        var supplierPerformance = await _context.Suppliers
-        //            .Select(s => new
-        //            {
-        //                s.SupplierId,                  // Supplier ID
-        //                s.Name,                         // Supplier Name
-        //                TotalProductsSupplied = s.Products.Count() // Count the products supplied by the supplier
-        //            })
-        //            .ToListAsync();
 
-        //        // Check if no data is found
-        //        if (supplierPerformance == null || !supplierPerformance.Any())
-        //        {
-        //            return NotFound("No supplier performance data available.");
-        //        }
 
-        //        // Return the result as JSON
-        //        return Ok(supplierPerformance);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        // Handle any exceptions and return a 500 Internal Server Error
-        //        Console.WriteLine($"Error: {ex.Message}");
-        //        return StatusCode(500, $"Internal server error: {ex.Message}");
-        //    }
-        //}
-        [HttpGet("supplier-performance")]
-        public async Task<ActionResult> GetSupplierPerformanceReport()
+        [HttpGet("supplier-summary")]
+        public IActionResult GetSupplierSummary()
         {
-            try
-            {
-                // Step 1: Get total products supplied by each supplier
-                var supplierPerformance = await _context.Suppliers
-                    .Select(s => new
-                    {
-                        s.SupplierId,                  // Supplier ID
-                        s.Name,                         // Supplier Name
-                        TotalProductsSupplied = s.Products.Count() // Count the products supplied by the supplier
-                    })
-                    .ToListAsync();
+            var supplierReport = _context.Orders
+                .Where(o => o.Status == "Completed") // Only include completed orders
+                .Join(_context.Products, // Join Orders with Products
+                    order => order.ProductId,
+                    product => product.ProductId,
+                    (order, product) => new { order, product }) // Anonymous type with order and product
 
-                // Step 2: Find the supplier with the maximum products supplied
-                var maxSupplier = supplierPerformance.OrderByDescending(sp => sp.TotalProductsSupplied)
-                                                      .FirstOrDefault();
+                .Join(_context.Suppliers, // Join Products with Suppliers
+                    op => op.product.SupplierId,
+                    supplier => supplier.SupplierId,
+                    (op, supplier) => new { op.order, op.product, supplier }) // Anonymous type with order, product, and supplier
 
-                // Step 3: Add a flag to indicate which supplier has supplied the most products
-                var result = supplierPerformance.Select(s => new
+                .GroupBy(o => o.supplier.SupplierId) // Group by SupplierId
+                .Select(g => new
                 {
-                    s.SupplierId,
-                    s.Name,
-                    s.TotalProductsSupplied,
-                    IsTopSupplier = s.SupplierId == maxSupplier?.SupplierId // Flag to indicate top supplier
-                }).ToList();
+                    SupplierId = g.Key,
+                    SupplierName = g.Select(o => o.supplier.Name).FirstOrDefault(),
+                    TotalQuantity = g.Sum(o => o.order.Quantity), // Total quantity of completed orders
+                    TotalRevenue = g.Sum(o => o.product.Price * o.order.Quantity) // Total revenue from completed orders
+                })
+                .ToList();
 
-                // Check if no data is found
-                if (result == null || !result.Any())
-                {
-                    return NotFound("No supplier performance data available.");
-                }
-
-                // Return the result as JSON
-                return Ok(result);
-            }
-            catch (Exception ex)
-            {
-                // Handle any exceptions and return a 500 Internal Server Error
-                Console.WriteLine($"Error: {ex.Message}");
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
+            return Ok(supplierReport);
         }
     }
 }
