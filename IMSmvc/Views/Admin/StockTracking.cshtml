@@ -1,5 +1,6 @@
-﻿@{
-    ViewBag.Title = "ReturnTrack";
+﻿
+@{
+    ViewBag.Title = "StockTracking";
 }
 
 <!DOCTYPE html>
@@ -105,20 +106,20 @@
 </head>
 <body>
 
-    <h1>Order Management</h1>
+    <h1>Stock Management</h1>
 
-    <h2>View All Orders</h2>
+
     <button type="button" onclick="fetchAllOrders()">Get All Orders</button>
 
     <div id="OrdersList"></div>
 
-    <h2>Check Stock</h2>
+    <h2>Stock Tracking</h2>
     <button type="button" onclick="checkStock()">Check Total Stock</button>
 
     <div id="TotalStock"></div>
 
     <script>
-        const apiUrl = 'http://localhost:7175/api/Orders'; // Adjust API URL accordingly
+        const apiUrl = 'https://localhost:7175/api/Orders'; // Adjust API URL accordingly
         let completedOrders = [];  // Array to hold all completed orders
         const productQuantities = {};  // Object to store the total quantity per productId
         const reorderLevel = 10;  // Define the reorder level for triggering popup
@@ -162,20 +163,20 @@
         function displayOrders(orders) {
             const ordersList = document.getElementById("OrdersList");
             let ordersTable = `<h3>Order List:</h3><table>
-                                    <tr><th>Order ID</th><th>Product ID</th><th>Quantity</th><th>Order Date</th><th>Status</th></tr>`;
+                                <tr><th>Order ID</th><th>Product ID</th><th>Quantity</th><th>Order Date</th><th>Status</th></tr>`;
 
             orders.forEach(order => {
                 ordersTable += `
-                        <tr id="order-${order.orderId}">
-                            <td>${order.orderId}</td>
-                            <td>${order.productId}</td>
-                            <td>${order.quantity}</td>
-                            <td>${order.orderDate}</td>
-                            <td>${order.status}</td>
-                        </tr>`;
+                    <tr id="order-${order.orderId}">
+                        <td>${order.orderId}</td>
+                        <td>${order.productId}</td>
+                        <td>${order.quantity}</td>
+                        <td>${order.orderDate}</td>
+                        <td>${order.status}</td>
+                    </tr>`;
             });
 
-            ordersTable += </table >;
+            ordersTable += `</table>`;
             ordersList.innerHTML = ordersTable;
         }
 
@@ -187,17 +188,17 @@
             }
 
             // Display the total quantity for each productId in a table format
-            let totalStockHtml = "<h3>Total Quantity Per Product:</h3><table><tr><th>Product ID</th><th>Total Quantity</th><th>Subtract Quantity</th><th>New Quantity</th></tr>";
+            let totalStockHtml = "<h3>Total stock present in eack product:</h3><table><tr><th>Product ID</th><th>Total Quantity</th><th>User Input</th><th>Stock Updation</th></tr>";
 
             // Loop through the productQuantities object and display the result with input and subtract button
             for (let productId in productQuantities) {
                 totalStockHtml += `
-                        <tr id="product-${productId}">
-                            <td>${productId}</td>
-                            <td id="total-${productId}">${productQuantities[productId]}</td>
-                            <td><input type="number" id="subtract-input-${productId}" value="0" min="0" /></td>
-                            <td><button onclick="subtractQuantity(${productId})">Subtract</button></td>
-                        </tr>`;
+                    <tr id="product-${productId}">
+                        <td>${productId}</td>
+                        <td id="total-${productId}">${productQuantities[productId]}</td>
+                        <td><input type="number" id="subtract-input-${productId}" value="0" min="0" /></td>
+                        <td><button onclick="subtractQuantity(${productId})">Update Stock</button></td>
+                    </tr>`;
             }
 
             totalStockHtml += "</table>";
@@ -206,7 +207,7 @@
 
         // Function to subtract the quantity from the total and update the table
         function subtractQuantity(productId) {
-            const subtractInput = document.getElementById(subtract - input - ${ productId });
+            const subtractInput = document.getElementById(`subtract-input-${productId}`);
             const subtractValue = parseInt(subtractInput.value, 10);
 
             if (isNaN(subtractValue) || subtractValue < 0) {
@@ -223,7 +224,7 @@
             productQuantities[productId] -= subtractValue;
 
             // Update the displayed total quantity in the table
-            document.getElementById(total - ${ productId }).textContent = productQuantities[productId];
+            document.getElementById(`total-${productId}`).textContent = productQuantities[productId];
 
             // Check if the product's quantity is below the reorder level
             if (productQuantities[productId] < reorderLevel) {
@@ -234,16 +235,18 @@
             subtractInput.value = "0";
 
             // Optionally, you can update the message to show success
-            displayMessage(Successfully subtracted ${ subtractValue } from product ID ${ productId }., false);
+            displayMessage(`Successfully subtracted ${subtractValue} from product ID ${productId}.`, false);
         }
 
         // Function to show a popup if the quantity goes below reorder level
         function showReorderPopup(productId, newQuantity) {
             // Create and display the popup
-            alert(Warning: Product ID ${ productId } has fallen below the reorder level! New Quantity: ${ newQuantity });
+            alert(`Warning: Product ID ${productId} has fallen below the reorder level! New Quantity: ${newQuantity}`);
         }
     </script>
 
 
 </body>
 </html>
+
+

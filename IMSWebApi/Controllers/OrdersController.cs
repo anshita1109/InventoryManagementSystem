@@ -39,25 +39,33 @@ namespace IMSWebApi.Controllers
             return order;
         }
 
-
-        // GET: api/Orders/GetByProductId/{productId}
         [HttpGet("GetByProductId/{productId}")]
         public IActionResult GetOrdersByProductId(int productId)
         {
+            // Filter orders by ProductId and order them by OrderDate
             var orders = _context.Orders
                                  .Where(o => o.ProductId == productId) // Filter by ProductId
+                                 .OrderBy(o => o.OrderDate)            // Optionally order by OrderDate
+                                 .Select(o => new OrderDTO
+                                 {
+                                     OrderId = o.OrderId,
+                                     ProductId = o.ProductId,
+                                     Quantity = o.Quantity,
+                                     Status = o.Status,
+                                     OrderDate = o.OrderDate
+                                 })
                                  .ToList();
 
-            if (orders == null || orders.Count == 0)
+            if (!orders.Any()) // Check if the list is empty
             {
-                return NotFound("No orders found for the specified product.");
+                return NotFound($"No orders found for the specified ProductId: {productId}.");
             }
 
-            return Ok(orders); // Return the list of orders associated with the productId
+            return Ok(orders); // Return the filtered list of orders
         }
 
-        // Other actions like GetAll, Post, Delete etc.
 
+        // Other actions like GetAll, Post, Delete etc.
         [HttpPut("{id}")]
         public async Task<IActionResult> PutOrder(int id, OrderDTO orderdto)
         {
@@ -95,6 +103,9 @@ namespace IMSWebApi.Controllers
 
             return NoContent();
         }
+
+
+
         // POST: api/Orders
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
@@ -132,5 +143,6 @@ namespace IMSWebApi.Controllers
         {
             return _context.Orders.Any(e => e.OrderId == id);
         }
+
     }
 }

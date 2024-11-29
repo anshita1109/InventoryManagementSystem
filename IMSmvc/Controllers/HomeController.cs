@@ -48,7 +48,8 @@ namespace IMSmvc.Controllers
                 // Logic for admin users
 
             }
-            //https://localhost:7254/api/Suppliers/supplierContact?contactinfo=sai%40gmail.com
+
+
             else
             {
                 HttpResponseMessage httpResponseMessage = await _httpClient.GetAsync($"https://localhost:7175/api/Suppliers/supplierContact?contactinfo=" + User.Identity.Name);

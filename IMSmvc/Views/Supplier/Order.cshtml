@@ -10,14 +10,14 @@
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 20px;
-            background-image: url("https://www.fntsoftware.com/assets/images/a/Blog_Hero_Network-Inventory-Management-Solution-scaled-78307a4f.jpeg");
+            background-image: url("https://img.freepik.com/premium-photo/smart-warehouse-inventory-management-system-concept-manager-using-digital-tablet-showing-warehouse-software-management-dashboard-blurred-warehouse-as-background_114016-20887.jpg");
             background-repeat: no-repeat;
             background-size: cover;
         }
 
         h1, h2 {
             text-align: center;
-            color: white;
+            color: antiquewhite;
         }
 
         #OrderForm {
@@ -105,13 +105,11 @@
     <h1>Order Management</h1>
 
     <div id="OrderForm">
-
         <div class="form-group">
-            <label for="productId">Product ID:</label>
-            <select id="productId" name="productId" required>
-                <!-- Product options will be populated here -->
-            </select>
+            <label for="productId">ProductId:</label>
+            <input type="number" id="productId" name="productId" required>
         </div>
+
 
         <div class="form-group">
             <label for="quantity">Quantity:</label>
@@ -119,7 +117,7 @@
         </div>
 
         <div class="form-group">
-            <label for="orderDate">Order Date:</label>
+            <label for="orderDate">Date:</label>
             <input type="date" id="orderDate" name="orderDate" required>
         </div>
 
@@ -131,7 +129,6 @@
                 <option value="return">Return</option>
             </select>
         </div>
-
 
         <button type="button" onclick="submitOrder()">Submit</button>
     </div>
@@ -148,12 +145,14 @@
         const productApiUrl = 'https://localhost:7175/api/Products'; // Adjust API URL for products
         let currentOrderId = null; // To track if an order is being edited
 
+        // Display messages with success or error styles
         function displayMessage(message, isError = false) {
             const responseLabel = document.getElementById("responseMessage");
             responseLabel.style.color = isError ? "red" : "green";
             responseLabel.textContent = message;
         }
 
+        // Submit order (add/update)
         function submitOrder() {
             const orderData = {
                 productId: parseInt(document.getElementById("productId").value),
@@ -172,7 +171,7 @@
                     .then(response => {
                         if (response.ok) {
                             displayMessage('Order updated successfully.');
-                            fetchAllOrders(); // Refresh order list
+                            //fetchAllOrders(); // Refresh order list
                             resetForm();
                         } else {
                             throw new Error('Failed to update order.');
@@ -189,7 +188,7 @@
                     .then(response => {
                         if (response.ok) {
                             displayMessage('Order added successfully.');
-                            fetchAllOrders(); // Refresh order list
+                            //fetchAllOrders(); // Refresh order list
                             resetForm();
                         } else {
                             throw new Error('Failed to add order.');
@@ -199,6 +198,7 @@
             }
         }
 
+        // Reset form after submission
         function resetForm() {
             document.getElementById("productId").value = '';
             document.getElementById("quantity").value = '';
@@ -207,44 +207,83 @@
             currentOrderId = null; // Reset the order ID for adding new orders
         }
 
+        // Fetch all orders for the selected product ID
         function fetchAllOrders() {
-            fetch(apiUrl)
+            const productId = document.getElementById("productId").value;
+
+            if (!productId) {
+                displayMessage("Please select a product first.", true);
+                return;
+            }
+
+            const url = `${apiUrl}/GetByProductId/${productId}`;
+
+            fetch(url)
                 .then(response => response.json())
                 .then(data => displayOrders(data))
-                .catch(error => displayMessage('There is an error fetching orders.', true));
+                .catch(error => displayMessage('There was an error fetching orders.', true));
         }
+
+        // Display orders in a table
 
         function displayOrders(orders) {
             const ordersList = document.getElementById("OrdersList");
-            ordersList.innerHTML = `<h3>Order List:</h3><table>
-                                            <tr><th>Order ID</th><th>Product ID</th><th>Quantity</th><th>Order Date</th><th>Status</th><th>Action</th><th>Edit</th></tr>
-                                            ${orders.map(order => `
-                                                <tr>
-                                                    <td>${order.orderId}</td>
-                                                    <td>${order.productId}</td>
-                                                    <td>${order.quantity}</td>
-                                                    <td>${order.orderDate}</td>
-                                                    <td>${order.status}</td>
-                                                    <td><button type="button" onclick="deleteOrder(${order.orderId})">DELETE</button></td>
-                                                    <td><button type="button" onclick="editOrder(${order.orderId})">EDIT</button></td>
-                                                </tr>`).join('')}`
-                ;
+
+            if (orders.length === 0) {
+                ordersList.innerHTML = "<p>No orders found for this product.</p>";
+                return;
+            }
+
+            let tableHTML = `<h3>Order List:</h3><table>
+                                 <tr><th>Order ID</th><th>Product ID</th><th>Quantity</th><th>Order Date</th><th>Status</th><th>Action</th></tr>`;
+
+            orders.forEach(order => {
+                tableHTML += `
+                    <tr>
+                        <td>${order.orderId}</td>
+                        <td>${order.productId ? order.productId : 'N/A'}</td> <!-- Show Product ID, fallback to 'N/A' -->
+                        <td>${order.quantity}</td>
+                        <td>${new Date(order.orderDate).toLocaleDateString()}</td>
+                        <td>${order.status}</td>
+                        <td>
+                            <button type="button" onclick="editOrder(${order.orderId})">EDIT</button>
+                            <button type="button" onclick="deleteOrder(${order.orderId})">DELETE</button>
+                        </td>
+                    </tr>`;
+            });
+
+            tableHTML += `</table>`;
+            ordersList.innerHTML = tableHTML;
         }
 
+
+
         function editOrder(orderId) {
+            // Fetch the order details for the given orderId
             fetch(`${apiUrl}/${orderId}`)
                 .then(response => response.json())
                 .then(order => {
+                    // Populate the form fields with the fetched order details
                     document.getElementById("productId").value = order.productId;
                     document.getElementById("quantity").value = order.quantity;
                     document.getElementById("orderDate").value = new Date(order.orderDate).toISOString().split('T')[0];
                     document.getElementById("status").value = order.status;
-                    currentOrderId = orderId; // Set the currentOrderId to indicate we're editing
+
+                    // Set the currentOrderId for later use when updating the order
+                    currentOrderId = orderId;
+
+                    // Scroll to the top of the page for a better user experience
                     window.scrollTo(0, 0);
+
+                    // Hide the OrdersList (the table) and show the edit form
+                    document.getElementById('OrdersList').style.display = 'none';
+                    document.getElementById('orderForm').style.display = 'block';  // Show the form
                 })
                 .catch(error => displayMessage('Error fetching order for edit.', true));
         }
 
+
+        // Delete order
         function deleteOrder(orderId) {
             if (!confirm(`Are you sure you want to delete order ID: ${orderId}?`)) {
                 return;
@@ -275,18 +314,20 @@
                     const productSelect = document.getElementById("productId");
                     products.forEach(product => {
                         const option = document.createElement("option");
-                        option.value = product.productId;  // assuming the product has a 'productId' field
-                        option.text = product.productId; // assuming the product has a 'productName' field
+                        option.value = product.productId;
+                        option.text = product.productId; // or product.name if available
                         productSelect.appendChild(option);
                     });
                 })
                 .catch(error => displayMessage('Failed to load products.', true));
         }
 
-        // Load the products on page load
+        // Load products on page load
         window.onload = function () {
             fetchProducts();
         };
     </script>
+
+
 </body>
 </html>

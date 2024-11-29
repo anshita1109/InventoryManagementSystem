@@ -32,9 +32,9 @@
                         <li class="nav-item">@Html.ActionLink("Home", "Index", "Home", new { area = "" }, new { @class = "nav-link" })</li>
                         <li class="nav-item">@Html.ActionLink("Supplier", "Supplier", "Admin", new { area = "" }, new { @class = "nav-link" })</li>
                         <li class="nav-item">@Html.ActionLink("Product", "Product", "Admin", new { area = "" }, new { @class = "nav-link" })</li>
-                        <li class="nav-item">@Html.ActionLink("Order", "Order", "Admin", new { area = "" }, new { @class = "nav-link" })</li>
                         <li class="nav-item">@Html.ActionLink("Report", "Report", "Admin", new { area = "" }, new { @class = "nav-link" })</li>
                         <li class="nav-item">@Html.ActionLink("AuditLogs", "AuditLog", "Admin", new { area = "" }, new { @class = "nav-link" })</li>
+                        <li class="nav-item">@Html.ActionLink("StockTracking", "StockTracking", "Admin", new { area = "" }, new { @class = "nav-link" })</li>
                     </ul>
                 }
                 else if (ViewBag.Role == "Supplier")
@@ -43,8 +43,9 @@
                         <li class="nav-item">@Html.ActionLink("Home", "Index", "Home", new { area = "" }, new { @class = "nav-link" })</li>
                         <li class="nav-item">@Html.ActionLink("Product", "Product", "Supplier", new { id = ViewBag.Message }, new { @class = "nav-link" })</li>
                         <li class="nav-item">@Html.ActionLink("Order", "Order", "Supplier", new { area = "" }, new { @class = "nav-link" })</li>
-                        <li class="nav-item">@Html.ActionLink("ReturnTrack", "ReturnTrack", "Supplier", new { area = "" }, new { @class = "nav-link" })</li>
-                    </ul>
+                        @*<li class="nav-item">@Html.ActionLink("ReturnTrack", "ReturnTrack", "Supplier", new { area = "" }, new { @class = "nav-link" })</li>
+                    </ul>*@
+                        </ul>
                 }
                 else
                 {

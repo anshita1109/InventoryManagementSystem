@@ -22,6 +22,15 @@ namespace IMSWebApi.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Supplier>>> GetSuppliers()
         {
+            //audit logs code
+            //await _context.AuditLogs.AddAsync(new AuditLog
+            //{
+            //    Action = "Add Supplier",
+            //    Description = " Adding Supplier",
+            //    //SupplierID = 0,
+            //    ActionDate = DateTime.Now,
+            //});
+            //await _context.SaveChangesAsync();
             return await _context.Suppliers.ToListAsync();
         }
 
@@ -85,6 +94,7 @@ namespace IMSWebApi.Controllers
             await _context.SaveChangesAsync();
             return NoContent();
         }
+
         // POST: api/Suppliers
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
@@ -98,6 +108,7 @@ namespace IMSWebApi.Controllers
             _context.Suppliers.Add(supplier);
             await _context.SaveChangesAsync();
 
+            //audit logs code
             await _context.AuditLogs.AddAsync(new AuditLog
             {
                 Action = "Add Supplier",
@@ -106,7 +117,6 @@ namespace IMSWebApi.Controllers
                 ActionDate = DateTime.Now,
             });
             await _context.SaveChangesAsync();
-
             return CreatedAtAction("GetSupplier", new { id = supplier.SupplierId }, supplier);
         }
 
@@ -124,6 +134,12 @@ namespace IMSWebApi.Controllers
             await _context.SaveChangesAsync();
 
             return NoContent();
+        }
+        // To compare the email for authentication
+        [HttpGet("supplierContact")]
+        public async Task<Supplier> GetByContactInfo(string contactinfo)
+        {
+            return await _context.Suppliers.FirstAsync(Supplier => Supplier.ContactInfo.Equals(contactinfo));
         }
 
         private bool SupplierExists(int id)

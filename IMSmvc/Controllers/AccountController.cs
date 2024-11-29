@@ -1,5 +1,4 @@
-﻿
-using System;
+﻿using System;
 using System.Globalization;
 using System.Linq;
 using System.Security.Claims;
@@ -168,7 +167,7 @@ namespace IMSmvc.Controllers
                 var result = await UserManager.CreateAsync(user, model.Password);
                 if (result.Succeeded)
                 {
-                    await SignInManager.SignInAsync(user, isPersistent: false, rememberBrowser: false);
+                    //await SignInManager.SignInAsync(user, isPersistent: false, rememberBrowser: false);
 
                     // For more information on how to enable account confirmation and password reset please visit https://go.microsoft.com/fwlink/?LinkID=320771
                     // Send an email with this link
@@ -180,7 +179,7 @@ namespace IMSmvc.Controllers
                     //return RedirectToAction("Supplier", "Account");
                     var json = JsonConvert.SerializeObject(new { name = model.Name, contactInfo = model.Email, address = model.Address });
                     var content = new StringContent(json, Encoding.UTF8, "application/json");
-                    HttpResponseMessage httpResponseMessage = await httpClient.PostAsync("https://localhost:7125/api/Suppliers", content);
+                    HttpResponseMessage httpResponseMessage = await httpClient.PostAsync("https://localhost:7175/api/Suppliers", content);
                     if (httpResponseMessage.IsSuccessStatusCode)
                     {
                         return RedirectToAction("Login", "Account");

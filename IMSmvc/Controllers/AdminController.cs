@@ -30,5 +30,9 @@ namespace IMSmvc.Controllers
         {
             return View();
         }
+        public ActionResult StockTracking()
+        {
+            return View();
+        }
     }
 }

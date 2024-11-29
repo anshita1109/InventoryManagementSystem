@@ -1,4 +1,4 @@
-﻿﻿﻿@{ ViewBag.Title = "Product"; }
+﻿@{ ViewBag.Title = "Product"; }
 
 <!DOCTYPE html>
 <html lang="en">
@@ -13,14 +13,14 @@
             margin: 0;
             padding: 20px;
             background-color: #f4f4f4;
-            background-image: url("https://www.fntsoftware.com/assets/images/a/Blog_Hero_Network-Inventory-Management-Solution-scaled-78307a4f.jpeg");
+            background-image: url("https://img.freepik.com/premium-photo/smart-warehouse-inventory-management-system-concept-manager-using-digital-tablet-showing-warehouse-software-management-dashboard-blurred-warehouse-as-background_114016-20887.jpg");
             background-repeat: no-repeat;
             background-size: cover;
         }
 
         h1 {
             text-align: center;
-            color: white;
+            color: antiquewhite;
         }
 
         #ProductForm {
@@ -136,12 +136,10 @@
         </div>
 
         <div class="form-group">
-            <label for="categoryId">Category ID:</label>
+            <label for="categoryId">Category:</label>
             <select id="categoryId" name="categoryId" required>
-
-                <option value="1">1</option>
-                <option value="2">2</option>
-                <option value="3">3</option>
+                <option value="">Select Category</option>
+                <!-- Category options will be populated here -->
             </select>
         </div>
 
@@ -158,9 +156,7 @@
 
         <div class="form-group">
             <label for="supplierId">Supplier ID:</label>
-            <select id="supplierId" name="supplierId" required>
-                <option value="">Select Supplier</option>
-            </select>
+            <input type="text" id="supplierId" value=@ViewBag.Message readonly />
         </div>
         <button type="button" onclick="postProduct()">Submit</button>
         <button type="button" id="updateButton" style="display:none;" onclick="putProduct()">Update</button>
@@ -175,26 +171,9 @@
 
     <script>
         const apiUrl = 'https://localhost:7175/api/Products';
-        const supplierApiUrl = 'https://localhost:7175/api/Suppliers';
+        const supplierApiUrl = 'https://localhost:7175/api/Products/supplierId?id='+@ViewBag.Message;
 
-        // Display the supplier dropdown
-        function loadSuppliers() {
-            fetch(supplierApiUrl)
-                .then(response => response.json())
-                .then(data => {
-                    const supplierSelect = document.getElementById("supplierId");
-                    data.forEach(supplier => {
-                        const option = document.createElement("option");
-                        option.value = supplier.supplierId;
-                        option.textContent = supplier.supplierId; // assuming 'name' is a field in the Supplier object
-                        supplierSelect.appendChild(option);
-                    });
-                })
-                .catch(error => displayMessage('Error loading suppliers: ' + error, true));
-        }
 
-        // Initialize the page
-        loadSuppliers();
 
         function displayMessage(message, isError = false) {
             const responseLabel = document.getElementById("responseMessage");
@@ -231,10 +210,33 @@
                     if (!response.ok) {
                         return Promise.reject('Failed to Submit');
                     }
-                    return response.json();
+                    return response.json(); // If successful, parse the response as JSON
                 })
-                .then(data => displayMessage('Product added successfully.'))
-                .catch(error => displayMessage(error, true));
+                .then(data => {
+                    displayMessage('Product added successfully.');
+
+                    // Optionally reset the form after successful submission
+                    resetForm();  // Call a function to reset form fields (you need to define this function)
+
+                    // Optionally redirect to a different page after submission
+                    //window.location.href = '/product-list';  // Redirect to product list page (modify URL as needed)
+                })
+                .catch(error => {
+                    displayMessage(error, true);
+                });
+        }
+
+        // Helper function to reset form fields (if needed)
+        function resetForm() {
+            document.getElementById("productId").value = '';
+            document.getElementById("sku").value = '';
+            document.getElementById("name").value = '';
+            document.getElementById("description").value = '';
+            document.getElementById("price").value = '';
+            document.getElementById("categoryId").value = '';
+            document.getElementById("stockLevel").value = '';
+            document.getElementById("reorderLevel").value = '';
+            document.getElementById("supplierId").value = '';
         }
 
 
@@ -278,24 +280,27 @@
             })
                 .then(response => {
                     if (!response.ok) {
-                        return Promise.reject('Failed to update');
+                        return Promise.reject('Failed to update product');
                     }
+                    // If no content is returned (status 204), we can proceed with the success logic
                     if (response.status === 204) {
                         displayMessage('Product updated successfully.');
-                        fetchAllProducts(); // Refresh the list
-                        resetForm(); // Reset the form after the update
+                        fetchAllProducts();  // Refresh the product list
+                        resetForm();         // Reset the form after the update
                         return;
                     }
-                    return response.json();
+                    return response.json();  // Otherwise, parse the response as JSON
                 })
                 .then(data => {
+                    // If response contains data, log success and refresh the list
                     if (data) {
                         displayMessage('Product updated successfully.');
-                        fetchAllProducts(); // Refresh the list
-                        resetForm(); // Reset the form after the update
+                        fetchAllProducts();  // Refresh the product list
+                        resetForm();         // Reset the form after the update
                     }
                 })
                 .catch(error => {
+                    // If an error occurs, display an error message
                     displayMessage(error, true);
                 });
         }
@@ -317,9 +322,8 @@
                 .catch(error => displayMessage(error, true));
         }
 
-        // GET method to fetch all products
         function fetchAllProducts() {
-            fetch(apiUrl)
+            fetch(supplierApiUrl)
                 .then(response => response.json())
                 .then(data => displayProducts(data))
                 .catch(error => displayMessage('There is an error fetching products.', true));
@@ -337,20 +341,20 @@
             products.forEach(product => {
                 const row = document.createElement("tr");
                 row.innerHTML = `
-                                            <td>${product.productId}</td>
-                                            <td>${product.name}</td>
-                                            <td>${product.sku}</td>
-                                            <td>${product.price}</td>
-                                            <td>${product.categoryId}</td>
-                                             <td>${product.stockLevel}</td>
-                                             <td>${product.reorderLevel}</td>
-                                             <td>${product.supplierId}</td>
-                                            <td>
-                                                <button onclick="editProduct(${product.productId})">Edit</button>
-                                                <button onclick="deleteProduct(${product.productId})">Delete</button>
-                                                <button onclick="checkStock(${product.productId}, ${product.stockLevel})">Check</button> <!-- New Check button -->
-                                            </td>
-                                        `;
+                                        <td>${product.productId}</td>
+                                        <td>${product.name}</td>
+                                        <td>${product.sku}</td>
+                                        <td>${product.price}</td>
+                                        <td>${product.categoryId}</td>
+                                         <td>${product.stockLevel}</td>
+                                         <td>${product.reorderLevel}</td>
+                                         <td>${product.supplierId}</td>
+                                        <td>
+                                            <button onclick="editProduct(${product.productId})">Edit</button>
+                                            <button onclick="deleteProduct(${product.productId})">Delete</button>
+                                            <button onclick="checkStock(${product.productId}, ${product.stockLevel})">Check</button> <!-- New Check button -->
+                                        </td>
+                                    `;
                 table.appendChild(row);
             });
 
@@ -485,6 +489,32 @@
                     displayMessage('Error fetching product details: ' + error, true);
                 });
         }
+        function fetchCategories() {
+            fetch('https://localhost:7175/api/Category')
+                .then(response => response.json())
+                .then(categories => {
+                    const categorySelect = document.getElementById("categoryId");
+
+                    // Clear existing options
+                    categorySelect.innerHTML = '<option value="">Select Category</option>';
+
+                    categories.forEach(category => {
+                        const option = document.createElement("option");
+                        option.value = category.categoryId;  // Assuming the response has categoryId and categoryType
+                        option.textContent = category.categoryType; // Assuming you want to display categoryType in the dropdown
+                        categorySelect.appendChild(option);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error fetching categories:', error);
+                });
+        }
+
+        // Call fetchCategories when the page loads
+        window.onload = function () {
+            fetchCategories();
+        };
+
     </script>
 </body>
 </html>

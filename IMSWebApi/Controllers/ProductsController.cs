@@ -24,6 +24,14 @@ namespace IMSWebApi.Controllers
         {
             return await _context.Products.ToListAsync();
         }
+        //get products by supplierId
+
+
+        [HttpGet("supplierId")]
+        public async Task<IEnumerable<object>> GetProductBySupplierId(int id)
+        {
+            return await _context.Products.Where(product => product.SupplierId == id).ToListAsync();
+        }
 
         // GET: api/Products/5
         [HttpGet("{id}")]
@@ -39,16 +47,60 @@ namespace IMSWebApi.Controllers
             return product;
         }
 
+        //// PUT: api/Products/5
+        //// To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        //[HttpPut("{id}")]
+        //public async Task<IActionResult> PutProduct(int id, ProductDTO productdto)
+        //{
+
+        //    Product product = new Product();
+
+        //    product.Name = productdto.Name;
+        //    product.Description = productdto.Description;
+        //    product.StockLevel = productdto.StockLevel;
+        //    product.SupplierId = productdto.SupplierId;
+        //    product.Price = productdto.Price;
+        //    product.ReorderLevel = productdto.ReorderLevel;
+        //    product.CategoryId = productdto.CategoryId;
+        //    product.SKU = productdto.SKU;
+        //    if (id != product.ProductId)
+        //    {
+        //        return BadRequest();
+        //    }
+
+        //    _context.Entry(product).State = EntityState.Modified;
+
+        //    try
+        //    {
+        //        await _context.SaveChangesAsync();
+        //    }
+        //    catch (DbUpdateConcurrencyException)
+        //    {
+        //        if (!ProductExists(id))
+        //        {
+        //            return NotFound();
+        //        }
+        //        else
+        //        {
+        //            throw;
+        //        }
+        //    }
+
+        //    return NoContent();
+        //}
+
         [HttpPut("{id}")]
         public async Task<IActionResult> PutProduct(int id, ProductDTO productdto)
         {
+            // Fetch the existing product from the database
             var product = await _context.Products.FindAsync(id);
 
             if (product == null)
             {
-                return NotFound(); // 404 Not Found
+                return NotFound();
             }
 
+            // Update the properties of the existing product
             product.SKU = productdto.SKU;
             product.Name = productdto.Name;
             product.Description = productdto.Description;
@@ -60,6 +112,7 @@ namespace IMSWebApi.Controllers
 
             try
             {
+                // Mark the entity as modified
                 _context.Entry(product).State = EntityState.Modified;
                 await _context.SaveChangesAsync();
             }
@@ -67,7 +120,7 @@ namespace IMSWebApi.Controllers
             {
                 if (!ProductExists(id))
                 {
-                    return NotFound(); // 404 Not Found
+                    return NotFound();
                 }
                 else
                 {
@@ -75,15 +128,13 @@ namespace IMSWebApi.Controllers
                 }
             }
 
-            return NoContent(); // Explicitly return 204 No Content
+            return NoContent();
         }
-
-
 
         // POST: api/Products
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Product>> PostProduct(ProductDTO productdto)
+        public async Task<ActionResult<Product>> PostProduct([FromBody] ProductDTO productdto)
         {
 
             Product product = new Product();
